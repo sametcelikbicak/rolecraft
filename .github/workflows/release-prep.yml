@@ -13,13 +13,15 @@ jobs:
   prepare-release:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,5 +66,3 @@ jobs:
             --head "changelog/${{ github.ref_name }}" \
             --title "chore: release ${{ github.ref_name }}" \
             --body-file /tmp/pr-body.md
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
