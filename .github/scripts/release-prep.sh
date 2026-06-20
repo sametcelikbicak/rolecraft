@@ -1,42 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: ./release-prep.sh <new_tag>
-# Example: ./release-prep.sh v0.2.0
-
 NEW_TAG="${1:?Usage: $0 <new_tag>}"
-NEW_VERSION="${NEW_TAG#v}" # Remove leading 'v' for package.json
+NEW_VERSION="${NEW_TAG#v}"
 
-# Get the previous tag (second latest)
 PREVIOUS_TAG=$(git tag --sort=-creatordate | sed -n '2p')
 
 if [ -z "$PREVIOUS_TAG" ]; then
-  echo "No previous tag found. Using initial state."
   PREVIOUS_TAG=""
 fi
 
 echo "Previous tag: $PREVIOUS_TAG"
 echo "Current tag:  $NEW_TAG"
 
-# Extract commits between tags
 if [ -n "$PREVIOUS_TAG" ]; then
   COMMITS=$(git log "$PREVIOUS_TAG..$NEW_TAG" --oneline --no-decorate 2>/dev/null || true)
 else
   COMMITS=$(git log --oneline --no-decorate "$NEW_TAG" 2>/dev/null || true)
 fi
 
-if [ -z "$COMMITS" ]; then
-  echo "No commits found between $PREVIOUS_TAG and $NEW_TAG"
-  COMMITS=""
-fi
-
-# Generate changelog entry date
 DATE=$(date +%Y-%m-%d)
 
-# Build the new changelog section
-CHANGELOG_ENTRY="## [$NEW_TAG] - $DATE"
-
-# Categorize commits
 ADDED=""
 FIXED=""
 CHANGED=""
@@ -46,7 +30,6 @@ OTHER=""
 
 while IFS= read -r line; do
   [ -z "$line" ] && continue
-  # Remove the leading hash (commit hash) and space
   MSG=$(echo "$line" | sed 's/^[a-f0-9]\{7,\} //')
 
   if echo "$MSG" | grep -qiE '^(feat|feature)(\(.*\))?:' || echo "$MSG" | grep -qiE '^added'; then
@@ -66,8 +49,7 @@ while IFS= read -r line; do
   fi
 done <<< "$COMMITS"
 
-# Build the entry content
-CONTENT="$CHANGELOG_ENTRY"
+CONTENT="## [$NEW_TAG] - $DATE"
 
 if [ -n "$ADDED" ]; then
   CONTENT="$CONTENT\n\n### Added"
@@ -99,39 +81,29 @@ if [ -n "$OTHER" ]; then
   CONTENT="$CONTENT$OTHER"
 fi
 
-CONTENT="$CONTENT\n"
-
-# Prepend to CHANGELOG.md
 if [ -f CHANGELOG.md ]; then
-  # Find the line number of the first occurrence of "## [" or "# Changelog"
-  # Insert after the header (after the first line that starts with "# ")
-  HEADER_LINE=$(grep -n '^# ' CHANGELOG.md | head -1 | cut -d: -f1)
-  if [ -n "$HEADER_LINE" ]; then
-    # Insert after the header line
-    sed -i '' "${HEADER_LINE}a\\
-\\
-${CONTENT}" CHANGELOG.md
+  FIRST_ENTRY_LINE=$(grep -n '^## \[' CHANGELOG.md | head -1 | cut -d: -f1)
+  if [ -n "$FIRST_ENTRY_LINE" ]; then
+    HEADER=$(head -n $((FIRST_ENTRY_LINE - 1)) CHANGELOG.md)
+    REST=$(tail -n +"$FIRST_ENTRY_LINE" CHANGELOG.md)
+    printf "%s\n\n%s\n%s\n" "$HEADER" "$CONTENT" "$REST" > CHANGELOG.md
   else
-    # No header found, prepend
-    TEMP=$(mktemp)
-    printf "%s\n\n%s" "$CONTENT" "$(cat CHANGELOG.md)" > "$TEMP"
-    mv "$TEMP" CHANGELOG.md
+    echo -e "\n$CONTENT" >> CHANGELOG.md
   fi
 else
   echo -e "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\n$CONTENT" > CHANGELOG.md
 fi
 
-# Update version in package.json
 if [ -f package.json ]; then
   if command -v jq &>/dev/null; then
     jq --arg ver "$NEW_VERSION" '.version = $ver' package.json > package.json.tmp && mv package.json.tmp package.json
   else
-    # Fallback: use sed
-    sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" package.json
+    node -e "
+      const pkg = require('./package.json');
+      pkg.version = '$NEW_VERSION';
+      require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+    "
   fi
-  echo "Updated package.json version to $NEW_VERSION"
-else
-  echo "Warning: package.json not found"
 fi
 
 echo "Changelog prepared for $NEW_TAG"
