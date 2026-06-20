@@ -40,6 +40,7 @@ rolecraft install ./path/to/my-skill          # install from local folder
 rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
 rolecraft list                                 # list installed skills
 rolecraft remove <slug>                        # remove a skill
+rolecraft --version                            # show version
 ```
 
 ### Install scope
@@ -104,6 +105,7 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 | `rolecraft list`             | Show all installed skills         |
 | `rolecraft remove <slug>`    | Uninstall a skill                 |
 | `rolecraft help`             | Show this help                    |
+| `rolecraft version`          | Show version (`--version`, `-v`) |
 
 ## Project structure
 

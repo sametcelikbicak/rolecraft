@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { installCommand } from '../src/commands/install.js'
 import { listCommand } from '../src/commands/list.js'
 import { removeCommand } from '../src/commands/remove.js'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 
 function usage() {
   console.log(`
@@ -69,6 +75,12 @@ export async function main() {
       break
     }
 
+    case 'version':
+    case '--version':
+    case '-v':
+      console.log(pkg.version)
+      break
+
     case 'help':
     case '--help':
     case '-h':
@@ -78,7 +90,6 @@ export async function main() {
   }
 }
 
-import { fileURLToPath } from 'node:url'
 import { realpathSync } from 'node:fs'
 
 export async function run() {

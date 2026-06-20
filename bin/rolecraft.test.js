@@ -172,6 +172,36 @@ describe('rolecraft CLI', () => {
     restoreExit()
   })
 
+  it('shows version for version command', async () => {
+    process.argv = ['node', 'rolecraft', 'version']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l === '0.1.0'))
+    restore()
+  })
+
+  it('shows version for --version flag', async () => {
+    process.argv = ['node', 'rolecraft', '--version']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l === '0.1.0'))
+    restore()
+  })
+
+  it('shows version for -v flag', async () => {
+    process.argv = ['node', 'rolecraft', '-v']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l === '0.1.0'))
+    restore()
+  })
+
   it('entry point invokes run() when executed directly', async () => {
     const { execSync } = await import('node:child_process')
     const binPath = new URL('./rolecraft.js', import.meta.url).pathname
@@ -180,5 +210,15 @@ describe('rolecraft CLI', () => {
       env: { ...process.env, HOME: tempDir },
     })
     assert.ok(result.includes('rolecraft'))
+  })
+
+  it('entry point shows version when run with --version', async () => {
+    const { execSync } = await import('node:child_process')
+    const binPath = new URL('./rolecraft.js', import.meta.url).pathname
+    const result = execSync(`node "${binPath}" --version`, {
+      encoding: 'utf-8',
+      env: { ...process.env, HOME: tempDir },
+    })
+    assert.equal(result.trim(), '0.1.0')
   })
 })
