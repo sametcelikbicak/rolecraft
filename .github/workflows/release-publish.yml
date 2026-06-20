@@ -28,9 +28,6 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Install dependencies
-        run: npm install --ignore-scripts
-
       - name: Publish to npm
         run: npm publish
         env:
