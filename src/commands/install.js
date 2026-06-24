@@ -3,7 +3,9 @@ import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
-function askQuestion(query) {
+let askQuestion = defaultAskQuestion
+
+function defaultAskQuestion(query) {
   const rl = createInterface({ input, output })
   return new Promise(resolve => {
     rl.question(query, answer => {
@@ -11,6 +13,10 @@ function askQuestion(query) {
       resolve(answer.trim().toLowerCase())
     })
   })
+}
+
+export function setAskQuestion(fn) {
+  askQuestion = fn
 }
 
 async function askScope() {
@@ -29,7 +35,7 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor
   const scope = hasScopeFlags ? options : await askScope()
 
   console.log(`\n🔍 Resolving skill from: ${source}`)
@@ -44,6 +50,7 @@ export async function installCommand(source, options) {
   const targets = []
   if (scope.global) targets.push('agents')
   if (scope.claude) targets.push('claude')
+  if (scope.cursor) targets.push('cursor')
   if (scope.project) targets.push('project')
 
   const results = await installSkill(resolved, targets)

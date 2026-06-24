@@ -5,6 +5,7 @@
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 [![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
+[![Tests](https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests)](https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml)
 [![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
 [![Changelog](https://img.shields.io/badge/📜-Changelog-blue)](CHANGELOG.md)
 [![Contributing](https://img.shields.io/badge/🤝-Contributing-green)](CONTRIBUTING.md)
@@ -106,8 +107,9 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 | `rolecraft install <source>` | Install a skill (local or GitHub) |
 | `rolecraft list`             | Show all installed skills         |
 | `rolecraft remove <slug>`    | Uninstall a skill                 |
+| `rolecraft update <slug>`    | Re-install a skill to latest      |
 | `rolecraft help`             | Show this help                    |
-| `rolecraft version`          | Show version (`--version`, `-v`)  |
+| `rolecraft version`          | Show version (`--version`, `-v`) |
 
 ## Project structure
 
@@ -118,7 +120,8 @@ rolecraft/
 │   ├── commands/
 │   │   ├── install.js        # install logic + interactive scope
 │   │   ├── list.js           # list installed skills
-│   │   └── remove.js         # remove skill + lockfile cleanup
+│   │   ├── remove.js         # remove skill + lockfile cleanup
+│   │   └── update.js         # re-install skill to latest
 │   └── utils/
 │       ├── resolver.js       # source resolver (local / GitHub)
 │       ├── installer.js      # copy files to target dirs

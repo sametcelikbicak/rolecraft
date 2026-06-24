@@ -1,4 +1,4 @@
-import { describe, it, before, after } from 'node:test'
+import { describe, it, before, after, mock } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
@@ -65,6 +65,15 @@ describe('install command', () => {
     restore()
   })
 
+  it('installs with --cursor flag', async () => {
+    const { logs, restore } = capture('log')
+
+    await installModule.installCommand(join(tempDir, 'test-skill'), { cursor: true })
+
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
+  })
+
   it('installs with default scope (global) when no flags given', async () => {
     const { logs, restore } = capture('log')
 
@@ -80,9 +89,32 @@ describe('install command', () => {
     const { logs, restore } = capture('log')
 
     await installModule.installCommand(join(tempDir, 'test-skill'), {
-      global: true, project: true, claude: true,
+      global: true, project: true, claude: true, cursor: true,
     })
 
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
+    process.cwd = origCwd
+  })
+})
+
+describe('askScope', () => {
+  function withAnswer(answer) {
+    installModule.setAskQuestion(() => Promise.resolve(answer))
+  }
+
+  it('returns global scope for empty input (default)', async () => {
+    withAnswer('')
+    const result = await installModule.installCommand(join(tempDir, 'test-skill'), {})
+    assert.equal(result, undefined) // just verifies no crash
+  })
+
+  it('returns project scope for choice 2 via installCommand', async () => {
+    withAnswer('2')
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(join(tempDir, 'test-skill'), {})
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()
     process.cwd = origCwd

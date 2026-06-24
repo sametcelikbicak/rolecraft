@@ -1,9 +1,14 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
+const VERSION = pkg.version
 
 let tempDir, rolecraftModule, origArgv, origExit
 
@@ -178,7 +183,7 @@ describe('rolecraft CLI', () => {
 
     await rolecraftModule.main()
 
-    assert.ok(logs.some(l => l === '0.1.0'))
+    assert.ok(logs.some(l => l === VERSION))
     restore()
   })
 
@@ -188,7 +193,7 @@ describe('rolecraft CLI', () => {
 
     await rolecraftModule.main()
 
-    assert.ok(logs.some(l => l === '0.1.0'))
+    assert.ok(logs.some(l => l === VERSION))
     restore()
   })
 
@@ -198,7 +203,7 @@ describe('rolecraft CLI', () => {
 
     await rolecraftModule.main()
 
-    assert.ok(logs.some(l => l === '0.1.0'))
+    assert.ok(logs.some(l => l === VERSION))
     restore()
   })
 
@@ -219,6 +224,6 @@ describe('rolecraft CLI', () => {
       encoding: 'utf-8',
       env: { ...process.env, HOME: tempDir },
     })
-    assert.equal(result.trim(), '0.1.0')
+    assert.equal(result.trim(), VERSION)
   })
 })
