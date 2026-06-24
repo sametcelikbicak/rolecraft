@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path'
 import { installCommand } from '../src/commands/install.js'
 import { listCommand } from '../src/commands/list.js'
 import { removeCommand } from '../src/commands/remove.js'
+import { updateCommand } from '../src/commands/update.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -21,11 +22,13 @@ Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
   rolecraft list                 List installed skills
   rolecraft remove <slug>        Remove a skill
+  rolecraft update <slug>        Re-install a skill (update to latest)
   rolecraft help                 Show this help
 
 Options for install:
   --global     Install to ~/.agents/skills/ (default)
   --claude     Also install to ~/.claude/skills/
+  --cursor     Also install to ~/.cursor/skills/
   --project    Install to ./.agents/skills/
   --all        Install to all locations
 
@@ -50,10 +53,11 @@ export async function main() {
       }
 
       const flags = args.slice(1)
-      const hasAnyFlag = flags.some(f => ['--global', '--project', '--claude', '--all'].includes(f))
+      const hasAnyFlag = flags.some(f => ['--global', '--project', '--claude', '--cursor', '--all'].includes(f))
       const options = hasAnyFlag ? {
         global: flags.includes('--global') || flags.includes('--all'),
         claude: flags.includes('--claude') || flags.includes('--all'),
+        cursor: flags.includes('--cursor') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
 
@@ -72,6 +76,16 @@ export async function main() {
         process.exit(1)
       }
       await removeCommand(slug)
+      break
+    }
+
+    case 'update': {
+      const slug = args[0]
+      if (!slug) {
+        console.error('Usage: rolecraft update <slug>')
+        process.exit(1)
+      }
+      await updateCommand(slug)
       break
     }
 

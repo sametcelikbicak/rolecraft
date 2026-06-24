@@ -33,7 +33,7 @@ after(async () => {
 })
 
 describe('remove command', () => {
-  it('removes an installed skill by exact slug', async () => {
+  it('removes an installed skill by exact slug from global', async () => {
     const logs = []
     mock.method(console, 'log', (...args) => {
       if (args.length) logs.push(String(args[0]))
@@ -44,6 +44,23 @@ describe('remove command', () => {
     const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
     assert.ok(!lock.skills['exact/skill'])
     assert.ok(logs.some(l => l.includes('Removed')))
+  })
+
+  it('removes from project lock when skill is project-scoped', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+
+    const logs = []
+    mock.method(console, 'log', (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    })
+
+    await removeModule.removeCommand('test/skill')
+
+    const globalLock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    assert.ok(!globalLock.skills['test/skill'])
+    assert.ok(logs.some(l => l.includes('Removed')))
+    process.cwd = origCwd
   })
 
   it('matches via normalized slug (replacing / with -)', async () => {
