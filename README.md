@@ -5,7 +5,7 @@
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 [![npm](https://img.shields.io/npm/v/rolecraft)](https://www.npmjs.com/package/rolecraft)
-[![Tests](https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/release-prep.yml?label=tests)](https://github.com/sametcelikbicak/rolecraft/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/sametcelikbicak/rolecraft/test.yml?label=tests)](https://github.com/sametcelikbicak/rolecraft/actions/workflows/test.yml)
 [![GitHub Stars](https://img.shields.io/github/stars/sametcelikbicak/rolecraft?style=social)](https://github.com/sametcelikbicak/rolecraft)
 [![Changelog](https://img.shields.io/badge/📜-Changelog-blue)](CHANGELOG.md)
 [![Contributing](https://img.shields.io/badge/🤝-Contributing-green)](CONTRIBUTING.md)
