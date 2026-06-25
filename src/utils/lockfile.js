@@ -12,6 +12,7 @@ const CODEX_DIR = join(homedir(), '.codex', 'skills')
 const COPILOT_DIR = join(homedir(), '.copilot', 'skills')
 const AIDER_DIR = join(homedir(), '.aider', 'skills')
 const CLINE_DIR = join(homedir(), '.cline', 'skills')
+const DEVIN_DIR = join(homedir(), '.devin', 'skills')
 
 export function getGlobalLockPath() {
   return GLOBAL_LOCK_PATH
@@ -47,6 +48,10 @@ export function getAiderDir() {
 
 export function getClineDir() {
   return CLINE_DIR
+}
+
+export function getDevinDir() {
+  return DEVIN_DIR
 }
 
 export function getProjectLockPath(cwd) {

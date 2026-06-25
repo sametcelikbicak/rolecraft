@@ -138,6 +138,35 @@ describe('update command', () => {
     console.log = origLog
   })
 
+  it('detects skill in devin target directory', async () => {
+    const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    lock.skills['dev/skill'] = {
+      name: 'Dev Skill',
+      source: join(tempDir, 'dev-source'),
+      sourceType: 'local',
+      installedAt: new Date().toISOString(),
+    }
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify(lock, null, 2))
+
+    mkdirSync(join(tempDir, 'dev-source'), { recursive: true })
+    writeFileSync(join(tempDir, 'dev-source', 'SKILL.md'), '# slug: dev/skill\nname: Dev Skill\nContent')
+
+    mkdirSync(join(tempDir, '.devin', 'skills', 'dev-skill'), { recursive: true })
+    writeFileSync(join(tempDir, '.devin', 'skills', 'dev-skill', 'SKILL.md'), '# slug: dev/skill\nname: Dev Skill\nContent')
+
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    }
+
+    await updateModule.updateCommand('dev/skill')
+
+    assert.ok(logs.some(l => l.includes('Updated')))
+    assert.ok(logs.some(l => l.includes('devin')))
+    console.log = origLog
+  })
+
   it('finds skill by normalized slug when exact match fails', async () => {
     const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
     lock.skills['dash/skill'] = {

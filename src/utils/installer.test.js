@@ -121,6 +121,16 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
+  it('installs skill to devin directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['devin'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'devin')
+
+    const skillDir = join(tempDir, '.devin', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
   it('installs skill to project directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir

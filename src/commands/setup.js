@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -14,6 +14,7 @@ const KNOWN_AGENTS = [
   { flag: 'copilot', label: 'copilot', dir: getCopilotDir },
   { flag: 'aider', label: 'aider', dir: getAiderDir },
   { flag: 'cline', label: 'cline', dir: getClineDir },
+  { flag: 'devin', label: 'devin', dir: getDevinDir },
 ]
 
 export function detectAgents() {
@@ -44,7 +45,7 @@ export async function setupCommand(source) {
     console.log('   No supported agents detected.\n')
     console.log('   rolecraft installs skills into agent skill directories.')
     console.log('   Install an AI coding agent (opencode, claude-code, cursor,')
-    console.log('   windsurf, codex, copilot, aider, cline) first.')
+    console.log('   windsurf, devin, codex, copilot, aider, cline) first.')
     return
   }
 
