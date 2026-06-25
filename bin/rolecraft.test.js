@@ -161,6 +161,39 @@ describe('rolecraft CLI', () => {
     restoreExit()
   })
 
+  it('errors when update has no slug', async () => {
+    process.argv = ['node', 'rolecraft', 'update']
+    const { logs: errors, restore: restoreErr } = capture('error')
+    const restoreExit = mockExit()
+
+    try {
+      await rolecraftModule.main()
+    } catch (e) {
+      assert.ok(e.message.includes('exit:1'))
+    }
+
+    assert.ok(errors.some(e => e.includes('Usage: rolecraft update <slug>')))
+    restoreErr()
+    restoreExit()
+  })
+
+  it('runs update command with existing skill', async () => {
+    const skillDir = join(tempDir, 'updatable-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/updatable\nname: updatable\nContent')
+
+    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global']
+    await rolecraftModule.main()
+
+    process.argv = ['node', 'rolecraft', 'update', 'test/updatable']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Updated')))
+    restore()
+  })
+
   it('run() catches errors', async () => {
     process.argv = ['node', 'rolecraft', 'install']
     const { logs: errors, restore: restoreErr } = capture('error')

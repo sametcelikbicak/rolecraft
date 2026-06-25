@@ -29,21 +29,13 @@ export async function removeCommand(slug) {
 
   if (globalFound) {
     const dir = join(getAgentsDir(), normalizeSlug(actualSlug))
-    try {
-      await rm(dir, { recursive: true, force: true })
-    } catch {
-      // directory might not exist
-    }
+    await rm(dir, { recursive: true, force: true })
     await removeSkillFromLock(actualSlug)
   }
 
   if (projectFound) {
     const projectDir = join(process.cwd(), '.agents', 'skills', normalizeSlug(actualSlug))
-    try {
-      await rm(projectDir, { recursive: true, force: true })
-    } catch {
-      // directory might not exist
-    }
+    await rm(projectDir, { recursive: true, force: true })
     await removeSkillFromLock(actualSlug, projectLockPath)
   }
 

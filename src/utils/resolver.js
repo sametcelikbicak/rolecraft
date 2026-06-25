@@ -1,9 +1,15 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import { join, dirname, basename } from 'node:path'
 import { tmpdir, homedir } from 'node:os'
-import { execSync } from 'node:child_process'
+import { execSync as defaultExecSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
+
+let runExec = defaultExecSync
+
+export function setExecSync(fn) {
+  runExec = fn
+}
 
 function isGitHubRef(source) {
   return /^[\w.-]+\/[\w.-]+$/.test(source) && !source.startsWith('/') && !source.startsWith('.')
@@ -100,7 +106,7 @@ async function resolveGitHub(source) {
   const url = `https://github.com/${source}.git`
 
   try {
-    execSync(`git clone --depth 1 "${url}" "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
+    runExec(`git clone --depth 1 "${url}" "${tmpDir}"`, { stdio: 'pipe', timeout: 30000 })
   } catch {
     throw new Error(`Failed to clone GitHub repo ${source}`)
   }
@@ -108,7 +114,7 @@ async function resolveGitHub(source) {
   const found = scanForSkill(tmpDir)
 
   if (found.length === 0) {
-    execSync(`rm -rf "${tmpDir}"`)
+    runExec(`rm -rf "${tmpDir}"`)
     throw new Error(`No SKILL.md found in GitHub repo ${source}`)
   }
 
@@ -126,7 +132,7 @@ async function resolveGitHub(source) {
     }
   }
 
-  execSync(`rm -rf "${tmpDir}"`)
+  runExec(`rm -rf "${tmpDir}"`)
 
   const owner = source.split('/')[0]
   return {
