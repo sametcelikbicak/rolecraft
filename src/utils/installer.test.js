@@ -71,6 +71,56 @@ describe('installer', () => {
     assert.ok(existsSync(join(skillDir, 'SKILL.md')))
   })
 
+  it('installs skill to windsurf directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['windsurf'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'windsurf')
+
+    const skillDir = join(tempDir, '.windsurf', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to codex directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['codex'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'codex')
+
+    const skillDir = join(tempDir, '.codex', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to copilot directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['copilot'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'copilot')
+
+    const skillDir = join(tempDir, '.copilot', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to aider directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['aider'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'aider')
+
+    const skillDir = join(tempDir, '.aider', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
+  it('installs skill to cline directory', async () => {
+    const results = await installerModule.installSkill(resolvedSkill, ['cline'])
+
+    assert.equal(results.length, 1)
+    assert.equal(results[0].target, 'cline')
+
+    const skillDir = join(tempDir, '.cline', 'skills', 'test-my-skill')
+    assert.ok(existsSync(join(skillDir, 'SKILL.md')))
+  })
+
   it('installs skill to project directory', async () => {
     const origCwd = process.cwd
     process.cwd = () => tempDir

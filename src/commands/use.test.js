@@ -46,4 +46,14 @@ describe('use command', () => {
     assert.ok(logs.some(l => l.includes('Content')))
     assert.ok(logs.some(l => l.includes('{"key": "value"}')))
   })
+
+  it('skips files not in fileContents', async () => {
+    capture()
+    await useModule.useCommand(join(tempDir, 'my-skill'))
+    restoreLog()
+
+    const contentLogs = logs.filter(l => l.includes('───'))
+    assert.ok(contentLogs.some(l => l.includes('SKILL.md')))
+    assert.ok(contentLogs.some(l => l.includes('config.json')))
+  })
 })

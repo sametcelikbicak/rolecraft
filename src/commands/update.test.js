@@ -109,6 +109,63 @@ describe('update command', () => {
     process.cwd = origCwd
   })
 
+  it('detects skill in windsurf target directory', async () => {
+    const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    lock.skills['wind/skill'] = {
+      name: 'Wind Skill',
+      source: join(tempDir, 'wind-source'),
+      sourceType: 'local',
+      installedAt: new Date().toISOString(),
+    }
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify(lock, null, 2))
+
+    mkdirSync(join(tempDir, 'wind-source'), { recursive: true })
+    writeFileSync(join(tempDir, 'wind-source', 'SKILL.md'), '# slug: wind/skill\nname: Wind Skill\nContent')
+
+    mkdirSync(join(tempDir, '.windsurf', 'skills', 'wind-skill'), { recursive: true })
+    writeFileSync(join(tempDir, '.windsurf', 'skills', 'wind-skill', 'SKILL.md'), '# slug: wind/skill\nname: Wind Skill\nContent')
+
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    }
+
+    await updateModule.updateCommand('wind/skill')
+
+    assert.ok(logs.some(l => l.includes('Updated')))
+    assert.ok(logs.some(l => l.includes('windsurf')))
+    console.log = origLog
+  })
+
+  it('finds skill by normalized slug when exact match fails', async () => {
+    const lock = JSON.parse(await readFile(join(tempDir, '.agents', '.skill-lock.json'), 'utf-8'))
+    lock.skills['dash/skill'] = {
+      name: 'Dash Skill',
+      source: join(tempDir, 'dash-source'),
+      sourceType: 'local',
+      installedAt: new Date().toISOString(),
+    }
+    await writeFile(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify(lock, null, 2))
+
+    mkdirSync(join(tempDir, 'dash-source'), { recursive: true })
+    writeFileSync(join(tempDir, 'dash-source', 'SKILL.md'), '# slug: dash/skill\nname: Dash Skill\nContent')
+
+    mkdirSync(join(tempDir, '.agents', 'skills', 'dash-skill'), { recursive: true })
+    writeFileSync(join(tempDir, '.agents', 'skills', 'dash-skill', 'SKILL.md'), '# slug: dash/skill\nname: Dash Skill\nContent')
+
+    const logs = []
+    const origLog = console.log
+    console.log = (...args) => {
+      if (args.length) logs.push(String(args[0]))
+    }
+
+    await updateModule.updateCommand('dash-skill')
+
+    assert.ok(logs.some(l => l.includes('Updated')))
+    console.log = origLog
+  })
+
   it('falls back to agents target when no existing targets detected', async () => {
     const lockPath = join(tempDir, '.agents', '.skill-lock.json')
     const lock = JSON.parse(await readFile(lockPath, 'utf-8'))
