@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir } from '../utils/lockfile.js'
+import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -41,6 +41,9 @@ function detectTargets(slug, cwd) {
 
   const clineDir = join(getClineDir(), normSlug)
   if (existsSync(join(clineDir, 'SKILL.md'))) targets.push('cline')
+
+  const devinDir = join(getDevinDir(), normSlug)
+  if (existsSync(join(devinDir, 'SKILL.md'))) targets.push('devin')
 
   const projectDir = join(cwd, '.agents', 'skills', normSlug)
   if (existsSync(join(projectDir, 'SKILL.md'))) targets.push('project')

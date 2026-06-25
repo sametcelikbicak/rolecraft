@@ -31,7 +31,7 @@
 - **agentskill.sh lockfile compatible** — cross-compatible with ecosystem
 - **Interactive scope prompt** — user-friendly first install
 - **Project scope default** — modern default (v0.2.0)
-- **9 agent targets** — opencode, claude-code, cursor, windsurf, codex, copilot, aider, cline
+- **10 agent targets** — opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline
 
 ## Weaknesses / Gaps
 
@@ -72,7 +72,8 @@
 | opencode    | `~/.agents/skills/` or `./.agents/skills/`     |
 | claude-code | `~/.claude/skills/` or `./.claude/skills/`     |
 | cursor      | `~/.cursor/skills/` or `./.cursor/skills/`     |
-| windsurf    | `~/.windsurf/skills/` or `./.windsurf/skills/` |
+| windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
+| devin       | `~/.devin/skills/` or `./.devin/skills/`       |
 | codex       | `~/.codex/skills/` or `./.codex/skills/`       |
 | copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
 | aider       | `~/.aider/skills/` or `./.aider/skills/`       |

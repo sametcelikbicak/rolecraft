@@ -40,7 +40,7 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.codex || options.copilot || options.aider || options.cline
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline
   const scope = hasScopeFlags ? options : await askScope()
 
   console.log(`\n🔍 Resolving skill from: ${source}`)
@@ -57,6 +57,7 @@ export async function installCommand(source, options) {
   if (scope.claude) targets.push('claude')
   if (scope.cursor) targets.push('cursor')
   if (scope.windsurf) targets.push('windsurf')
+  if (scope.devin) targets.push('devin')
   if (scope.codex) targets.push('codex')
   if (scope.copilot) targets.push('copilot')
   if (scope.aider) targets.push('aider')

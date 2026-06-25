@@ -52,7 +52,25 @@ describe('setup command', () => {
     assert.ok(logs.some(l => l.includes('claude-code')))
   })
 
+  it('handles missing project dir when detecting agents', async () => {
+    mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
+    mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
+
+    const origCwd = process.cwd
+    process.cwd = () => join(tempDir, 'nonexistent')
+    capture()
+    await setupModule.setupCommand()
+    restoreLog()
+    process.cwd = origCwd
+
+    assert.ok(logs.some(l => l.includes('opencode')))
+    assert.ok(logs.some(l => l.includes('claude-code')))
+  })
+
   it('installs a skill when source is provided', async () => {
+    mkdirSync(join(tempDir, '.agents', 'skills'), { recursive: true })
+    mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true })
+
     const skillDir = join(tempDir, 'setup-skill')
     mkdirSync(skillDir, { recursive: true })
     writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/setup-skill\nname: setup-test\nContent')

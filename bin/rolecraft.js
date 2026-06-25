@@ -18,7 +18,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with opencode, claude-code, cursor, windsurf, codex, copilot, aider, cline, and all spec-compliant agents.
+Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
@@ -34,7 +34,8 @@ Options for install:
   --project    Install to ./.agents/skills/ (default)
   --claude     Also install to ~/.claude/skills/
   --cursor     Also install to ~/.cursor/skills/
-  --windsurf   Also install to ~/.windsurf/skills/
+  --windsurf   Also install to ~/.windsurf/skills/ (deprecated: use --devin)
+  --devin      Also install to ~/.devin/skills/
   --codex      Also install to ~/.codex/skills/
   --copilot    Also install to ~/.copilot/skills/
   --aider      Also install to ~/.aider/skills/
@@ -62,13 +63,14 @@ export async function main() {
       }
 
       const flags = args.slice(1)
-      const knownFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--codex', '--copilot', '--aider', '--cline', '--all']
+      const knownFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--all']
       const hasAnyFlag = flags.some(f => knownFlags.includes(f))
       const options = hasAnyFlag ? {
         global: flags.includes('--global') || flags.includes('--all'),
         claude: flags.includes('--claude') || flags.includes('--all'),
         cursor: flags.includes('--cursor') || flags.includes('--all'),
         windsurf: flags.includes('--windsurf') || flags.includes('--all'),
+        devin: flags.includes('--devin') || flags.includes('--all'),
         codex: flags.includes('--codex') || flags.includes('--all'),
         copilot: flags.includes('--copilot') || flags.includes('--all'),
         aider: flags.includes('--aider') || flags.includes('--all'),

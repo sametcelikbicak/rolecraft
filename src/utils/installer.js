@@ -1,7 +1,7 @@
 import { mkdir, cp, writeFile, readFile, access, stat } from 'node:fs/promises'
 import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -54,6 +54,11 @@ export async function installSkill(resolved, targets) {
       case 'cline': {
         baseDir = getClineDir()
         label = '~/.cline/skills/'
+        break
+      }
+      case 'devin': {
+        baseDir = getDevinDir()
+        label = '~/.devin/skills/'
         break
       }
       case 'project': {

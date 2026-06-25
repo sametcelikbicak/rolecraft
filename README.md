@@ -14,7 +14,7 @@
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
 
-Works with **opencode**, **claude-code**, **cursor**, **windsurf**, **codex**, **copilot**, **aider**, **cline**, and all spec-compliant agents.
+Works with **opencode**, **claude-code**, **cursor**, **windsurf** (deprecated → **devin**), **codex**, **copilot**, **aider**, **cline**, and all spec-compliant agents.
 
 ## Why rolecraft?
 
@@ -23,7 +23,7 @@ Works with **opencode**, **claude-code**, **cursor**, **windsurf**, **codex**, *
 | Zero dependencies                 | ✅               | ✅              | ❌ (2)               |
 | Local path install                | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
 | GitHub repo install               | ✅               | ✅              | ❌                   |
-| Agent targets                     | 9                | 68+             | 20+                  |
+| Agent targets                     | 10               | 68+             | 20+                  |
 | Offline capable                   | ✅               | ❌              | ❌                   |
 | agentskill.sh lockfile compatible | ✅               | ✅              | ✅                   |
 | Project-level install             | ✅               | ✅              | ✅                   |
@@ -73,7 +73,8 @@ rolecraft install ./my-skill --project   # ./.agents/skills/ (default)
 rolecraft install ./my-skill --global    # ~/.agents/skills/
 rolecraft install ./my-skill --claude    # also ~/.claude/skills/
 rolecraft install ./my-skill --cursor    # also ~/.cursor/skills/
-rolecraft install ./my-skill --windsurf  # also ~/.windsurf/skills/
+rolecraft install ./my-skill --windsurf  # also ~/.windsurf/skills/ (deprecated: use --devin)
+rolecraft install ./my-skill --devin     # also ~/.devin/skills/
 rolecraft install ./my-skill --codex     # also ~/.codex/skills/
 rolecraft install ./my-skill --copilot   # also ~/.copilot/skills/
 rolecraft install ./my-skill --aider     # also ~/.aider/skills/
@@ -84,7 +85,7 @@ rolecraft install ./my-skill --all       # all locations
 Combine flags to install to multiple agents:
 
 ```bash
-rolecraft install ./my-skill --claude --cursor --windsurf
+rolecraft install ./my-skill --claude --cursor --devin
 ```
 
 ### Preview a skill without installing
@@ -139,16 +140,19 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 | opencode    | `~/.agents/skills/` or `./.agents/skills/`  |
 | claude-code | `~/.claude/skills/` or `./.claude/skills/`  |
 | cursor      | `~/.cursor/skills/` or `./.cursor/skills/`  |
-| windsurf    | `~/.windsurf/skills/` or `./.windsurf/skills/` |
+| windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
+| devin       | `~/.devin/skills/` or `./.devin/skills/`    |
 | codex       | `~/.codex/skills/` or `./.codex/skills/`    |
 | copilot     | `~/.copilot/skills/` or `./.copilot/skills/` |
 | aider       | `~/.aider/skills/` or `./.aider/skills/`    |
 | cline       | `~/.cline/skills/` or `./.cline/skills/`    |
 
+> ⚠️ Windsurf was rebranded to **Devin Desktop** in June 2026. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
+
 Install to multiple agents at once:
 
 ```bash
-rolecraft install ./my-skill --cursor --windsurf --copilot
+rolecraft install ./my-skill --cursor --devin --copilot
 ```
 
 ## Commands
