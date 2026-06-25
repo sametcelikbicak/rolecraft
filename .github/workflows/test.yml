@@ -25,4 +25,4 @@ jobs:
           node-version: '22.14.0'
 
       - name: Run tests
-        run: npm test
+        run: node --test --test-concurrency=1

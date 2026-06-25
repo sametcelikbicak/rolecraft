@@ -45,6 +45,8 @@ rolecraft install ./path/to/my-skill              # install from local folder
 rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
 rolecraft install ./my-skill --claude --cursor     # install for specific agents
 rolecraft use sametcelikbicak/task-decomposer      # preview without installing
+rolecraft setup                                    # detect installed agents
+rolecraft setup ./my-skill                         # detect + install to all agents
 rolecraft list                                     # list installed skills
 rolecraft remove <slug>                            # remove a skill
 rolecraft update <slug>                            # re-install to latest
@@ -91,6 +93,16 @@ rolecraft use sametcelikbicak/task-decomposer
 ```
 
 The `use` command resolves the source, shows metadata, and prints all file contents to stdout — without writing anything to disk. Useful for inspecting a skill before installing, or piping content into other tools.
+
+### Detect agents and install to all
+
+```bash
+rolecraft setup                    # detect which agents are available
+rolecraft setup ./my-skill         # detect + install to all detected agents
+rolecraft setup sametcelikbicak/task-decomposer
+```
+
+Run `rolecraft setup` to see which AI agents are installed on your system. Pass a source to automatically install a skill to all detected agents at once.
 
 ### Source types
 
@@ -143,6 +155,7 @@ rolecraft install ./my-skill --cursor --windsurf --copilot
 | ---------------------------- | -------------------------------------------------------- |
 | `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`)      |
 | `rolecraft use <source>`     | Preview a skill's files without installing               |
+| `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all         |
 | `rolecraft list`             | Show all installed skills                                |
 | `rolecraft remove <slug>`    | Uninstall a skill                                        |
 | `rolecraft update <slug>`    | Re-install a skill to latest                             |
@@ -159,6 +172,7 @@ rolecraft/
 │   │   ├── install.js        # install logic + interactive scope
 │   │   ├── list.js           # list installed skills
 │   │   ├── remove.js         # remove skill + lockfile cleanup
+│   │   ├── setup.js          # detect agents + install to all
 │   │   ├── update.js         # re-install skill to latest
 │   │   └── use.js            # preview skill without installing
 │   └── utils/

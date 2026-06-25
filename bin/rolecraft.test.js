@@ -291,4 +291,28 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('Content')))
     restore()
   })
+
+  it('runs setup command without source', async () => {
+    process.argv = ['node', 'rolecraft', 'setup']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Detecting agents')))
+    restore()
+  })
+
+  it('runs setup command with source', async () => {
+    const skillDir = join(tempDir, 'setup-cli-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/setup-cli\nname: setup-cli-test\nContent')
+
+    process.argv = ['node', 'rolecraft', 'setup', skillDir]
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('setup-cli-test')))
+    restore()
+  })
 })

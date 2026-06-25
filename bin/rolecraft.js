@@ -8,6 +8,7 @@ import { listCommand } from '../src/commands/list.js'
 import { removeCommand } from '../src/commands/remove.js'
 import { updateCommand } from '../src/commands/update.js'
 import { useCommand } from '../src/commands/use.js'
+import { setupCommand } from '../src/commands/setup.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -25,6 +26,7 @@ Usage:
   rolecraft list                 List installed skills
   rolecraft remove <slug>        Remove a skill
   rolecraft update <slug>        Re-install a skill (update to latest)
+  rolecraft setup [<source>]     Detect agents and optionally install a skill
   rolecraft help                 Show this help
 
 Options for install:
@@ -110,6 +112,12 @@ export async function main() {
         process.exit(1)
       }
       await useCommand(source)
+      break
+    }
+
+    case 'setup': {
+      const source = args[0]
+      await setupCommand(source)
       break
     }
 
