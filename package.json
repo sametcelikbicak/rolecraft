@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/sametcelikbicak/rolecraft#readme",
   "scripts": {
-    "test": "node --test",
+    "test": "node --test --test-concurrency=1",
     "test:coverage": "node --experimental-test-coverage --test"
   },
   "engines": {
