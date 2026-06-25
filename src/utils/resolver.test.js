@@ -214,6 +214,7 @@ describe('resolver', () => {
   })
 
   describe('resolveGitHub', () => {
+
     it('throws for invalid GitHub ref', async () => {
       await freshImport()
       await assert.rejects(
@@ -227,6 +228,48 @@ describe('resolver', () => {
       await assert.rejects(
         () => resolverModule.resolveSource('nonexistent-owner/nonexistent-repo'),
         /Failed to clone/,
+      )
+    })
+
+    it('resolves a GitHub repo successfully', async () => {
+      await freshImport()
+      resolverModule.setExecSync((cmd) => {
+        const match = cmd.match(/"([^"]+)"$/)
+        if (match) {
+          const d = match[1]
+          mkdirSync(d, { recursive: true })
+          writeFileSync(join(d, 'SKILL.md'), '# slug: test/skill\nname: test-skill\nContent')
+          writeFileSync(join(d, 'helper.js'), 'x')
+          try { symlinkSync('/nonexistent-target', join(d, 'broken.txt')) } catch {}
+        }
+      })
+
+      const result = await resolverModule.resolveSource('user/repo')
+
+      assert.equal(result.name, 'test-skill')
+      assert.equal(result.slug, 'test/skill')
+      assert.equal(result.owner, 'user')
+      assert.equal(result.sourceType, 'github')
+      assert.equal(result.sourcePath, 'user/repo')
+      assert.ok(result.files.includes('SKILL.md'))
+      assert.ok(result.files.includes('helper.js'))
+      assert.ok(result.fileContents)
+    })
+
+    it('throws when no SKILL.md found in cloned repo', async () => {
+      await freshImport()
+      resolverModule.setExecSync((cmd) => {
+        const match = cmd.match(/"([^"]+)"$/)
+        if (match) {
+          const d = match[1]
+          mkdirSync(d, { recursive: true })
+          writeFileSync(join(d, 'README.md'), 'no skill here')
+        }
+      })
+
+      await assert.rejects(
+        () => resolverModule.resolveSource('user/no-skill'),
+        /No SKILL.md found/,
       )
     })
 

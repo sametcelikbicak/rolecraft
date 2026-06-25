@@ -1,9 +1,18 @@
-import { createInterface } from 'node:readline'
+import { createInterface as defaultCreateInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
+let createInterface = defaultCreateInterface
 let askQuestion = defaultAskQuestion
+
+export function setCreateInterface(fn) {
+  createInterface = fn
+}
+
+export function setAskQuestion(fn) {
+  askQuestion = fn
+}
 
 function defaultAskQuestion(query) {
   const rl = createInterface({ input, output })
@@ -13,10 +22,6 @@ function defaultAskQuestion(query) {
       resolve(answer.trim().toLowerCase())
     })
   })
-}
-
-export function setAskQuestion(fn) {
-  askQuestion = fn
 }
 
 async function askScope() {

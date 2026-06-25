@@ -1,4 +1,4 @@
-import { describe, it, before, after, mock } from 'node:test'
+import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
@@ -118,5 +118,17 @@ describe('askScope', () => {
     assert.ok(logs.some(l => l.includes('Installed')))
     restore()
     process.cwd = origCwd
+  })
+
+  it('calls defaultAskQuestion when askQuestion is not overridden', async () => {
+    installModule.setCreateInterface(() => ({
+      question: (query, cb) => { cb('') },
+      close: () => {},
+    }))
+
+    const { logs, restore } = capture('log')
+    await installModule.installCommand(join(tempDir, 'test-skill'), {})
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
   })
 })
