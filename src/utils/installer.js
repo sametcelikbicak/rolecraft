@@ -1,5 +1,5 @@
-import { mkdir, cp, writeFile, readFile, access, stat } from 'node:fs/promises'
-import { join, basename } from 'node:path'
+import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink } from 'node:fs/promises'
+import { join, basename, relative, dirname } from 'node:path'
 import { homedir } from 'node:os'
 import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 
@@ -7,7 +7,7 @@ function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
 }
 
-export async function installSkill(resolved, targets) {
+export async function installSkill(resolved, targets, mode = 'copy') {
   const slug = resolved.slug
   const results = []
 
@@ -128,19 +128,26 @@ export async function installSkill(resolved, targets) {
     const slugDir = join(baseDir, normalizeSlug(slug))
     const destSkillPath = join(slugDir, 'SKILL.md')
 
-    await mkdir(slugDir, { recursive: true })
-
-    for (const file of resolved.files) {
-      const dst = join(slugDir, file)
-      if (resolved.fileContents?.[file]) {
-        await writeFile(dst, resolved.fileContents[file])
-      } else if (resolved.skillDir) {
-        const src = join(resolved.skillDir, file)
-        try {
-          await stat(src)
-          await cp(src, dst, { recursive: true, force: true })
-        } catch {
-          // skip files that don't exist
+    if (mode === 'symlink' && resolved.skillDir) {
+      const relPath = relative(dirname(slugDir), resolved.skillDir)
+      try {
+        await unlink(slugDir)
+      } catch {}
+      await symlink(relPath, slugDir)
+    } else {
+      await mkdir(slugDir, { recursive: true })
+      for (const file of resolved.files) {
+        const dst = join(slugDir, file)
+        if (resolved.fileContents?.[file]) {
+          await writeFile(dst, resolved.fileContents[file])
+        } else if (resolved.skillDir) {
+          const src = join(resolved.skillDir, file)
+          try {
+            await stat(src)
+            await cp(src, dst, { recursive: true, force: true })
+          } catch {
+            // skip files that don't exist
+          }
         }
       }
     }
@@ -151,7 +158,7 @@ export async function installSkill(resolved, targets) {
 
     await addSkillToLock(slug, {
       slug,
-      contentSha: resolved.contentSha || 'local',
+      contentSha: resolved.contentSha,
       installedAt: new Date().toISOString(),
       agents: ['opencode', 'claude-code'],
       source: resolved.sourcePath,

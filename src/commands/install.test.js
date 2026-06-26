@@ -5,11 +5,14 @@ import { mkdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, installModule
+let tempDir, installModule, origCwd, origHome
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-install-cmd-test-'))
+  origCwd = process.cwd()
+  origHome = process.env.HOME
   process.env.HOME = tempDir
+  process.chdir(tempDir)
 
   const skillDir = join(tempDir, 'test-skill')
   mkdirSync(skillDir, { recursive: true })
@@ -22,6 +25,8 @@ before(async () => {
 })
 
 after(async () => {
+  process.chdir(origCwd)
+  process.env.HOME = origHome
   await rm(tempDir, { recursive: true, force: true })
 })
 

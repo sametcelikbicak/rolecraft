@@ -4,6 +4,7 @@ import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
+import { computeContentHash } from './lockfile.js'
 
 let runExec = defaultExecSync
 
@@ -87,7 +88,7 @@ async function resolveLocal(source) {
     for (const f of files) {
       try { fileContents[f] = readFileSync(join(skillDir, f), 'utf-8') } catch {}
     }
-    return { ...meta, content, files, fileContents, skillDir, sourcePath: source, sourceType: 'local' }
+    return { ...meta, content, files, fileContents, contentSha: computeContentHash(fileContents), skillDir, sourcePath: source, sourceType: 'local' }
   } catch {
     // direct SKILL.md not found, scan recursively
   }
@@ -107,7 +108,7 @@ async function resolveLocal(source) {
     try { fileContents[f] = readFileSync(join(skill.dir, f), 'utf-8') } catch {}
   }
 
-  return { ...skill, files, fileContents, skillDir: skill.dir, sourcePath: source, sourceType: 'local' }
+  return { ...skill, files, fileContents, contentSha: computeContentHash(fileContents), skillDir: skill.dir, sourcePath: source, sourceType: 'local' }
 }
 
 async function resolveGitHub(source) {
@@ -150,6 +151,7 @@ async function resolveGitHub(source) {
     slug: skill.slug === 'unknown' || skill.slug === skill.name ? `${owner}/${skill.name}` : skill.slug,
     files,
     fileContents,
+    contentSha: computeContentHash(fileContents),
     sourcePath: source,
     sourceType: 'github',
   }
