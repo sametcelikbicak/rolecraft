@@ -11,6 +11,8 @@ import { useCommand } from '../src/commands/use.js'
 import { setupCommand } from '../src/commands/setup.js'
 import { initCommand } from '../src/commands/init.js'
 import { searchCommand } from '../src/commands/search.js'
+import { verifyCommand } from '../src/commands/verify.js'
+import { ciCommand } from '../src/commands/ci.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -31,6 +33,8 @@ Usage:
   rolecraft setup [<source>]     Detect agents and optionally install a skill
   rolecraft init [<name>]        Scaffold a new SKILL.md
   rolecraft search <query>       Search for skills on GitHub
+  rolecraft verify               Verify installed skill integrity
+  rolecraft ci                   Install all skills from lockfile
   rolecraft help                 Show this help
 
 Options for install:
@@ -57,6 +61,8 @@ Options for install:
   --loom         Also install to ~/.loom/skills/
   --all          Install to all locations
   --frozen-lockfile  Fail if skill already installed
+  --symlink      Install as symlink instead of copy
+  --copy         Install as copy (default)
 
 Examples:
   rolecraft install ./my-skill
@@ -105,6 +111,7 @@ export async function main() {
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
       options.frozenLockfile = flags.includes('--frozen-lockfile')
+      options.symlink = flags.includes('--symlink')
 
       await installCommand(source, options)
       break
@@ -158,6 +165,16 @@ export async function main() {
         process.exit(1)
       }
       await searchCommand(query)
+      break
+    }
+
+    case 'verify': {
+      await verifyCommand(true)
+      break
+    }
+
+    case 'ci': {
+      await ciCommand()
       break
     }
 

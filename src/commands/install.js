@@ -14,6 +14,10 @@ export function setAskQuestion(fn) {
   askQuestion = fn
 }
 
+export function resetAskQuestion() {
+  askQuestion = defaultAskQuestion
+}
+
 function defaultAskQuestion(query) {
   const rl = createInterface({ input, output })
   return new Promise(resolve => {
@@ -90,7 +94,7 @@ export async function installCommand(source, options) {
   if (scope.loom) targets.push('loom')
   if (scope.project) targets.push('project')
 
-  const results = await installSkill(resolved, targets)
+  const results = await installSkill(resolved, targets, options.symlink ? 'symlink' : 'copy')
 
   console.log('✅ Installed successfully:\n')
   for (const r of results) {

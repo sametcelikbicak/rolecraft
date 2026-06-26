@@ -59,9 +59,7 @@
 ### Future
 
 - [ ] Lockfile version upgrade (v3→v4 with hashes)
-- [ ] Plugin system (install bundles of skills)
 - [ ] TUI for skill browsing
-- [ ] Docker-based sandboxed installs
 
 ## Agent Directory Reference
 
@@ -75,18 +73,18 @@
 | codex       | `~/.codex/skills/` or `./.codex/skills/`       |
 | copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
 | aider       | `~/.aider/skills/` or `./.aider/skills/`       |
- | cline       | `~/.cline/skills/` or `./.cline/skills/`       |
-| gemini-cli  | `~/.gemini/skills/`                              |
-| cody        | `~/.cody/skills/`                               |
-| continue    | `~/.continue/skills/`                           |
-| warp        | `~/.warp/skills/`                               |
-| codeium     | `~/.codeium/skills/`                            |
-| fabric      | `~/.fabric/skills/`                             |
-| goose       | `~/.goose/skills/`                              |
-| tabnine     | `~/.tabnine/skills/`                            |
-| supermaven  | `~/.supermaven/skills/`                         |
-| pr-pilot    | `~/.pr-pilot/skills/`                           |
-| loom        | `~/.loom/skills/`                               |
+| cline       | `~/.cline/skills/` or `./.cline/skills/`       |
+| gemini-cli  | `~/.gemini/skills/`                            |
+| cody        | `~/.cody/skills/`                              |
+| continue    | `~/.continue/skills/`                          |
+| warp        | `~/.warp/skills/`                              |
+| codeium     | `~/.codeium/skills/`                           |
+| fabric      | `~/.fabric/skills/`                            |
+| goose       | `~/.goose/skills/`                             |
+| tabnine     | `~/.tabnine/skills/`                           |
+| supermaven  | `~/.supermaven/skills/`                        |
+| pr-pilot    | `~/.pr-pilot/skills/`                          |
+| loom        | `~/.loom/skills/`                              |
 
 ## Competitor Analysis
 

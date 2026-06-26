@@ -1,6 +1,6 @@
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, existsSync, readFileSync, readlinkSync, lstatSync } from 'node:fs'
 import { mkdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -302,5 +302,27 @@ describe('installer', () => {
       readFileSync(join(skillDir, 'data.json'), 'utf-8'),
       '{"key": "value"}',
     )
+  })
+
+  it('installs with symlink mode', async () => {
+    const sourceDir = join(tempDir, 'symlink-source')
+    mkdirSync(sourceDir, { recursive: true })
+    writeFileSync(join(sourceDir, 'SKILL.md'), '# slug: test/symlink\nname: symlink-skill\nContent')
+
+    const symlinkResolved = {
+      ...resolvedSkill,
+      slug: 'test/symlink',
+      skillDir: sourceDir,
+      files: ['SKILL.md'],
+      fileContents: {},
+    }
+
+    const results = await installerModule.installSkill(symlinkResolved, ['agents'], 'symlink')
+    assert.equal(results.length, 1)
+
+    const skillDir = join(tempDir, '.agents', 'skills', 'test-symlink')
+    assert.ok(lstatSync(skillDir).isSymbolicLink())
+    const target = readlinkSync(skillDir)
+    assert.ok(target.includes('symlink-source'))
   })
 })

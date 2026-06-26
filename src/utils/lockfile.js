@@ -1,112 +1,93 @@
 import { mkdir, readFile, writeFile, access } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
-import { homedir } from 'node:os'
+import { createHash } from 'node:crypto'
 
-const GLOBAL_AGENTS_DIR = join(homedir(), '.agents')
-const GLOBAL_LOCK_PATH = join(GLOBAL_AGENTS_DIR, '.skill-lock.json')
-const GLOBAL_AGENTS_SKILLS_DIR = join(GLOBAL_AGENTS_DIR, 'skills')
-const CLAUDE_DIR = join(homedir(), '.claude', 'skills')
-const CURSOR_DIR = join(homedir(), '.cursor', 'skills')
-const WINDSURF_DIR = join(homedir(), '.windsurf', 'skills')
-const CODEX_DIR = join(homedir(), '.codex', 'skills')
-const COPILOT_DIR = join(homedir(), '.copilot', 'skills')
-const AIDER_DIR = join(homedir(), '.aider', 'skills')
-const CLINE_DIR = join(homedir(), '.cline', 'skills')
-const DEVIN_DIR = join(homedir(), '.devin', 'skills')
-const GEMINI_DIR = join(homedir(), '.gemini', 'skills')
-const CODY_DIR = join(homedir(), '.cody', 'skills')
-const CONTINUE_DIR = join(homedir(), '.continue', 'skills')
-const WARP_DIR = join(homedir(), '.warp', 'skills')
-const CODEIUM_DIR = join(homedir(), '.codeium', 'skills')
-const FABRIC_DIR = join(homedir(), '.fabric', 'skills')
-const GOOSE_DIR = join(homedir(), '.goose', 'skills')
-const TABNINE_DIR = join(homedir(), '.tabnine', 'skills')
-const SUPERMAVEN_DIR = join(homedir(), '.supermaven', 'skills')
-const PR_PILOT_DIR = join(homedir(), '.pr-pilot', 'skills')
-const LOOM_DIR = join(homedir(), '.loom', 'skills')
+function home(...parts) {
+  return join(process.env.HOME || process.env.HOMEPATH || '/tmp', ...parts)
+}
 
 export function getGlobalLockPath() {
-  return GLOBAL_LOCK_PATH
+  return home('.agents', '.skill-lock.json')
 }
 
 export function getAgentsDir() {
-  return GLOBAL_AGENTS_SKILLS_DIR
+  return home('.agents', 'skills')
 }
 
 export function getClaudeDir() {
-  return CLAUDE_DIR
+  return home('.claude', 'skills')
 }
 
 export function getCursorDir() {
-  return CURSOR_DIR
+  return home('.cursor', 'skills')
 }
 
 export function getWindsurfDir() {
-  return WINDSURF_DIR
+  return home('.windsurf', 'skills')
 }
 
 export function getCodexDir() {
-  return CODEX_DIR
+  return home('.codex', 'skills')
 }
 
 export function getCopilotDir() {
-  return COPILOT_DIR
+  return home('.copilot', 'skills')
 }
 
 export function getAiderDir() {
-  return AIDER_DIR
+  return home('.aider', 'skills')
 }
 
 export function getClineDir() {
-  return CLINE_DIR
+  return home('.cline', 'skills')
 }
 
 export function getDevinDir() {
-  return DEVIN_DIR
+  return home('.devin', 'skills')
 }
 
 export function getGeminiDir() {
-  return GEMINI_DIR
+  return home('.gemini', 'skills')
 }
 
 export function getCodyDir() {
-  return CODY_DIR
+  return home('.cody', 'skills')
 }
 
 export function getContinueDir() {
-  return CONTINUE_DIR
+  return home('.continue', 'skills')
 }
 
 export function getWarpDir() {
-  return WARP_DIR
+  return home('.warp', 'skills')
 }
 
 export function getCodeiumDir() {
-  return CODEIUM_DIR
+  return home('.codeium', 'skills')
 }
 
 export function getFabricDir() {
-  return FABRIC_DIR
+  return home('.fabric', 'skills')
 }
 
 export function getGooseDir() {
-  return GOOSE_DIR
+  return home('.goose', 'skills')
 }
 
 export function getTabnineDir() {
-  return TABNINE_DIR
+  return home('.tabnine', 'skills')
 }
 
 export function getSupermavenDir() {
-  return SUPERMAVEN_DIR
+  return home('.supermaven', 'skills')
 }
 
 export function getPrPilotDir() {
-  return PR_PILOT_DIR
+  return home('.pr-pilot', 'skills')
 }
 
 export function getLoomDir() {
-  return LOOM_DIR
+  return home('.loom', 'skills')
 }
 
 export function getProjectLockPath(cwd) {
@@ -117,7 +98,7 @@ async function ensureParentDir(filePath) {
   await mkdir(dirname(filePath), { recursive: true })
 }
 
-export async function readLock(lockPath = GLOBAL_LOCK_PATH) {
+export async function readLock(lockPath = getGlobalLockPath()) {
   try {
     await access(lockPath)
     const raw = await readFile(lockPath, 'utf-8')
@@ -127,21 +108,33 @@ export async function readLock(lockPath = GLOBAL_LOCK_PATH) {
   }
 }
 
-export async function writeLock(data, lockPath = GLOBAL_LOCK_PATH) {
+export async function writeLock(data, lockPath = getGlobalLockPath()) {
   await ensureParentDir(lockPath)
   await writeFile(lockPath, JSON.stringify(data, null, 2) + '\n', 'utf-8')
 }
 
-export async function addSkillToLock(slug, entry, lockPath = GLOBAL_LOCK_PATH) {
+export async function addSkillToLock(slug, entry, lockPath = getGlobalLockPath()) {
   const lock = await readLock(lockPath)
   lock.skills[slug] = { ...entry, installedAt: new Date().toISOString() }
   await writeLock(lock, lockPath)
   return lock
 }
 
-export async function removeSkillFromLock(slug, lockPath = GLOBAL_LOCK_PATH) {
+export async function removeSkillFromLock(slug, lockPath = getGlobalLockPath()) {
   const lock = await readLock(lockPath)
   delete lock.skills[slug]
   await writeLock(lock, lockPath)
   return lock
 }
+
+export function computeContentHash(fileContents) {
+  const hash = createHash('sha256')
+  const sortedNames = Object.keys(fileContents).sort()
+  for (const name of sortedNames) {
+    hash.update(`${name}\0`)
+    hash.update(fileContents[name])
+  }
+  return hash.digest('hex')
+}
+
+

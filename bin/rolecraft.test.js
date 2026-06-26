@@ -10,11 +10,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 const VERSION = pkg.version
 
-let tempDir, rolecraftModule, origArgv, origExit
+let tempDir, rolecraftModule, origArgv, origExit, origCwd, origHome
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-cli-test-'))
+  origHome = process.env.HOME
+  origCwd = process.cwd()
   process.env.HOME = tempDir
+  process.chdir(tempDir)
   await mkdir(join(tempDir, '.agents'), { recursive: true })
 
   origArgv = process.argv
@@ -25,6 +28,8 @@ before(async () => {
 after(async () => {
   process.exit = origExit
   process.argv = origArgv
+  process.chdir(origCwd)
+  process.env.HOME = origHome
   await rm(tempDir, { recursive: true, force: true })
 })
 
@@ -317,8 +322,6 @@ describe('rolecraft CLI', () => {
   })
 
   it('runs init command without name', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
     process.argv = ['node', 'rolecraft', 'init']
     const { logs, restore } = capture('log')
 
@@ -327,12 +330,9 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('Created skill scaffold')))
     assert.ok(logs.some(l => l.includes('my-skill')))
     restore()
-    process.cwd = origCwd
   })
 
   it('runs init command with name', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
     process.argv = ['node', 'rolecraft', 'init', 'my-custom-skill']
     const { logs, restore } = capture('log')
 
@@ -340,12 +340,9 @@ describe('rolecraft CLI', () => {
 
     assert.ok(logs.some(l => l.includes('my-custom-skill')))
     restore()
-    process.cwd = origCwd
   })
 
   it('runs init command with namespaced name', async () => {
-    const origCwd = process.cwd
-    process.cwd = () => tempDir
     process.argv = ['node', 'rolecraft', 'init', 'namespace/my-skill']
     const { logs, restore } = capture('log')
 
@@ -354,7 +351,6 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('namespace/my-skill')))
     assert.ok(logs.some(l => l.includes('namespace-my-skill')))
     restore()
-    process.cwd = origCwd
   })
 
   it('errors when search has no query', async () => {
@@ -418,5 +414,41 @@ describe('rolecraft CLI', () => {
     assert.ok(errors.some(e => e.includes('already installed')), `Expected 'already installed' in: ${errors.join(', ')}`)
     restoreErr()
     restoreExit()
+  })
+
+  it('runs verify command with no skills', async () => {
+    process.argv = ['node', 'rolecraft', 'verify']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Verifying')))
+    restore()
+  })
+
+  it('runs ci command with no skills', async () => {
+    writeFileSync(join(tempDir, '.agents', '.skill-lock.json'), JSON.stringify({ version: 3, skills: {}, dismissed: {}, lastSelectedAgents: [] }))
+
+    process.argv = ['node', 'rolecraft', 'ci']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('No skills in lockfile')))
+    restore()
+  })
+
+  it('installs with --symlink flag', async () => {
+    const skillDir = join(tempDir, 'symlink-cli-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/symlink-cli\nname: symlink-cli\nContent')
+
+    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--symlink']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
   })
 })

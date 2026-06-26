@@ -5,11 +5,14 @@ import { mkdir, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
 
-let tempDir, installModule
+let tempDir, installModule, origCwd, origHome
 
 before(async () => {
   tempDir = mkdtempSync(join(tmpdir(), 'rolecraft-install-cmd-test-'))
+  origCwd = process.cwd()
+  origHome = process.env.HOME
   process.env.HOME = tempDir
+  process.chdir(tempDir)
 
   const skillDir = join(tempDir, 'test-skill')
   mkdirSync(skillDir, { recursive: true })
@@ -22,6 +25,8 @@ before(async () => {
 })
 
 after(async () => {
+  process.chdir(origCwd)
+  process.env.HOME = origHome
   await rm(tempDir, { recursive: true, force: true })
 })
 
@@ -132,14 +137,17 @@ describe('askScope', () => {
   })
 
   it('calls defaultAskQuestion when askQuestion is not overridden', async () => {
+    let called = false
     installModule.setCreateInterface(() => ({
-      question: (query, cb) => { cb('') },
+      question: (query, cb) => { cb(''); called = true },
       close: () => {},
     }))
+    installModule.resetAskQuestion()
 
     const { logs, restore } = capture('log')
     await installModule.installCommand(join(tempDir, 'test-skill'), {})
     assert.ok(logs.some(l => l.includes('Installed')))
+    assert.ok(called, 'defaultAskQuestion should have called createInterface')
     restore()
   })
 

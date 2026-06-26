@@ -18,20 +18,23 @@ Works with **20 agents**: opencode, claude-code, cursor, windsurf, devin, codex,
 
 ## Why rolecraft?
 
-| Feature                           | rolecraft        | `npx add-skill` | `@agentskill.sh/cli` |
-| --------------------------------- | ---------------- | --------------- | -------------------- |
-| Zero dependencies                 | ✅               | ✅              | ❌ (2)               |
-| Local path install                | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
-| GitHub repo install               | ✅               | ✅              | ❌                   |
-| Agent targets                     | 20               | 68+             | 20+                  |
-| SKILL.md scaffolding              | ✅               | ✅              | ❌                   |
-| Skill discovery (search)          | ✅               | ✅              | ✅                   |
-| Offline capable                   | ✅               | ❌              | ❌                   |
-| agentskill.sh lockfile compatible | ✅               | ✅              | ✅                   |
-| Project-level install             | ✅               | ✅              | ✅                   |
-| Lockfile integrity (`--frozen-lockfile`) | ✅        | ❌              | ❌                   |
-| npm provenance                    | ✅               | ❌              | ❌                   |
-| File size                         | ~4 KB            | ~500 KB+        | ~84 KB               |
+| Feature                                  | rolecraft        | `npx add-skill` | `@agentskill.sh/cli` |
+| ---------------------------------------- | ---------------- | --------------- | -------------------- |
+| Zero dependencies                        | ✅               | ✅              | ❌ (2)               |
+| Local path install                       | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
+| GitHub repo install                      | ✅               | ✅              | ❌                   |
+| Agent targets                            | 20               | 68+             | 20+                  |
+| SKILL.md scaffolding                     | ✅               | ✅              | ❌                   |
+| Skill discovery (search)                 | ✅               | ✅              | ✅                   |
+| Offline capable                          | ✅               | ❌              | ❌                   |
+| agentskill.sh lockfile compatible        | ✅               | ✅              | ✅                   |
+| Project-level install                    | ✅               | ✅              | ✅                   |
+| Lockfile integrity (`--frozen-lockfile`) | ✅               | ❌              | ❌                   |
+| Content hash verification (`verify`)     | ✅               | ❌              | ❌                   |
+| CI-mode re-install (`ci`)                | ✅               | ❌              | ❌                   |
+| Symlink install (`--symlink`)            | ✅               | ❌              | ❌                   |
+| npm provenance                           | ✅               | ❌              | ❌                   |
+| File size                                | ~4 KB            | ~500 KB+        | ~84 KB               |
 
 ## Install
 
@@ -45,7 +48,7 @@ npx rolecraft install <source>
 
 ```bash
 rolecraft init my-skill                            # scaffold a new SKILL.md
-rolecraft install ./path/to/my-skill              # install from local folder
+rolecraft install ./path/to/my-skill               # install from local folder
 rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
 rolecraft install ./my-skill --claude --cursor     # install for specific agents
 rolecraft search code-review                       # search skills on GitHub
@@ -53,6 +56,8 @@ rolecraft use sametcelikbicak/task-decomposer      # preview without installing
 rolecraft setup                                    # detect installed agents
 rolecraft setup ./my-skill                         # detect + install to all agents
 rolecraft list                                     # list installed skills
+rolecraft verify                                   # verify installed skill integrity
+rolecraft ci                                       # re-install all skills from lockfile
 rolecraft remove <slug>                            # remove a skill
 rolecraft update <slug>                            # re-install to latest
 rolecraft --version                                # show version
@@ -97,6 +102,8 @@ rolecraft install ./my-skill --pr-pilot     # also ~/.pr-pilot/skills/
 rolecraft install ./my-skill --loom         # also ~/.loom/skills/
 rolecraft install ./my-skill --all          # all locations
 rolecraft install ./my-skill --frozen-lockfile  # fail if skill is already installed
+rolecraft install ./my-skill --symlink          # symlink instead of copy
+rolecraft install ./my-skill --copy             # force copy (default)
 ```
 
 Combine flags to install to multiple agents:
@@ -166,34 +173,37 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 ## What it does
 
 1. Reads `SKILL.md` from the source and parses metadata (slug, name, owner)
-2. Copies all files alongside `SKILL.md` (references, configs, assets) to the target directory
-3. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
-4. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
+2. Copies (or symlinks with `--symlink`) all files alongside `SKILL.md` to the target directory
+3. Computes a SHA256 content hash and stores it in the lockfile
+4. Updates `~/.agents/.skill-lock.json` so agents can discover the skill
+5. `rolecraft verify` checks installed files against the stored hash
+6. `rolecraft ci` re-installs all skills from the lockfile (e.g. in CI pipelines)
+7. Compatible with skills installed by `@agentskill.sh/cli`, `add-skill`, or manual installs
 
 ## How agents discover skills
 
-| Agent       | Directory                                   |
-| ----------- | ------------------------------------------- |
-| opencode    | `~/.agents/skills/` or `./.agents/skills/`  |
-| claude-code | `~/.claude/skills/` or `./.claude/skills/`  |
-| cursor      | `~/.cursor/skills/` or `./.cursor/skills/`  |
+| Agent       | Directory                                      |
+| ----------- | ---------------------------------------------- |
+| opencode    | `~/.agents/skills/` or `./.agents/skills/`     |
+| claude-code | `~/.claude/skills/` or `./.claude/skills/`     |
+| cursor      | `~/.cursor/skills/` or `./.cursor/skills/`     |
 | windsurf ⚠️ | `~/.windsurf/skills/` or `./.windsurf/skills/` |
-| devin       | `~/.devin/skills/` or `./.devin/skills/`    |
-| codex       | `~/.codex/skills/` or `./.codex/skills/`    |
-| copilot     | `~/.copilot/skills/` or `./.copilot/skills/` |
-| aider       | `~/.aider/skills/` or `./.aider/skills/`    |
-| cline       | `~/.cline/skills/` or `./.cline/skills/`    |
-| gemini-cli  | `~/.gemini/skills/`                          |
-| cody        | `~/.cody/skills/`                            |
-| continue    | `~/.continue/skills/`                        |
-| warp        | `~/.warp/skills/`                            |
-| codeium     | `~/.codeium/skills/`                         |
-| fabric      | `~/.fabric/skills/`                          |
-| goose       | `~/.goose/skills/`                           |
-| tabnine     | `~/.tabnine/skills/`                         |
-| supermaven  | `~/.supermaven/skills/`                      |
-| pr-pilot    | `~/.pr-pilot/skills/`                        |
-| loom        | `~/.loom/skills/`                            |
+| devin       | `~/.devin/skills/` or `./.devin/skills/`       |
+| codex       | `~/.codex/skills/` or `./.codex/skills/`       |
+| copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
+| aider       | `~/.aider/skills/` or `./.aider/skills/`       |
+| cline       | `~/.cline/skills/` or `./.cline/skills/`       |
+| gemini-cli  | `~/.gemini/skills/`                            |
+| cody        | `~/.cody/skills/`                              |
+| continue    | `~/.continue/skills/`                          |
+| warp        | `~/.warp/skills/`                              |
+| codeium     | `~/.codeium/skills/`                           |
+| fabric      | `~/.fabric/skills/`                            |
+| goose       | `~/.goose/skills/`                             |
+| tabnine     | `~/.tabnine/skills/`                           |
+| supermaven  | `~/.supermaven/skills/`                        |
+| pr-pilot    | `~/.pr-pilot/skills/`                          |
+| loom        | `~/.loom/skills/`                              |
 
 > ⚠️ Windsurf was rebranded to **Devin Desktop** in June 2026. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 
@@ -205,18 +215,20 @@ rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 
 ## Commands
 
-| Command                      | Description                                              |
-| ---------------------------- | -------------------------------------------------------- |
-| `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                                |
-| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`)      |
-| `rolecraft search <query>`   | Search for skills on GitHub                              |
-| `rolecraft use <source>`     | Preview a skill's files without installing               |
-| `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all         |
-| `rolecraft list`             | Show all installed skills                                |
-| `rolecraft remove <slug>`    | Uninstall a skill                                        |
-| `rolecraft update <slug>`    | Re-install a skill to latest                             |
-| `rolecraft help`             | Show this help                                           |
-| `rolecraft version`          | Show version (`--version`, `-v`)                         |
+| Command                      | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
+| `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                           |
+| `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`) |
+| `rolecraft search <query>`   | Search for skills on GitHub                         |
+| `rolecraft use <source>`     | Preview a skill's files without installing          |
+| `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all    |
+| `rolecraft list`             | Show all installed skills                           |
+| `rolecraft verify`           | Check installed skill integrity via content hash    |
+| `rolecraft ci`               | Re-install all skills from lockfile (CI mode)       |
+| `rolecraft remove <slug>`    | Uninstall a skill                                   |
+| `rolecraft update <slug>`    | Re-install a skill to latest                        |
+| `rolecraft help`             | Show this help                                      |
+| `rolecraft version`          | Show version (`--version`, `-v`)                    |
 
 ## Project structure
 
@@ -225,6 +237,7 @@ rolecraft/
 ├── bin/rolecraft.js          # CLI entry point
 ├── src/
 │   ├── commands/
+│   │   ├── ci.js             # frozen lockfile install
 │   │   ├── init.js           # SKILL.md scaffolding
 │   │   ├── install.js        # install logic + interactive scope
 │   │   ├── list.js           # list installed skills
@@ -232,11 +245,12 @@ rolecraft/
 │   │   ├── search.js         # GitHub skill discovery
 │   │   ├── setup.js          # detect agents + install to all
 │   │   ├── update.js         # re-install skill to latest
-│   │   └── use.js            # preview skill without installing
+│   │   ├── use.js            # preview skill without installing
+│   │   └── verify.js         # integrity verification
 │   └── utils/
 │       ├── resolver.js       # source resolver (local / GitHub)
-│       ├── installer.js      # copy files to target dirs
-│       └── lockfile.js       # read/write .skill-lock.json
+│       ├── installer.js      # copy/symlink files to target dirs
+│       └── lockfile.js       # read/write .skill-lock.json + content hash
 ├── package.json
 ├── CHANGELOG.md              # Release history
 ├── CONTRIBUTING.md           # Contribution guide

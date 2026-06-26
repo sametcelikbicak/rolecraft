@@ -66,4 +66,23 @@ describe('lockfile', () => {
     const lock = await lockModule.readLock()
     assert.ok(!lock.skills['to-remove'])
   })
+
+  it('computeContentHash produces deterministic hash', () => {
+    const h1 = lockModule.computeContentHash({ 'SKILL.md': 'content', 'helper.js': 'x' })
+    const h2 = lockModule.computeContentHash({ 'helper.js': 'x', 'SKILL.md': 'content' })
+    assert.equal(h1, h2)
+    assert.equal(h1.length, 64)
+  })
+
+  it('computeContentHash changes when content changes', () => {
+    const h1 = lockModule.computeContentHash({ 'SKILL.md': 'same', 'extra.js': 'a' })
+    const h2 = lockModule.computeContentHash({ 'SKILL.md': 'same', 'extra.js': 'b' })
+    assert.notEqual(h1, h2)
+  })
+
+  it('computeContentHash returns different hash for different files', () => {
+    const h1 = lockModule.computeContentHash({ 'SKILL.md': 'x' })
+    const h2 = lockModule.computeContentHash({ 'SKILL.md': 'x', 'extra.js': 'y' })
+    assert.notEqual(h1, h2)
+  })
 })
