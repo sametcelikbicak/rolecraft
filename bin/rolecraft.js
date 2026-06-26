@@ -9,6 +9,8 @@ import { removeCommand } from '../src/commands/remove.js'
 import { updateCommand } from '../src/commands/update.js'
 import { useCommand } from '../src/commands/use.js'
 import { setupCommand } from '../src/commands/setup.js'
+import { initCommand } from '../src/commands/init.js'
+import { searchCommand } from '../src/commands/search.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -18,7 +20,7 @@ function usage() {
 rolecraft — Install AI agent skills like roles & behaviors
 
 Zero dependencies, no marketplace required.
-Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, and all spec-compliant agents.
+Works with opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, and all spec-compliant agents.
 
 Usage:
   rolecraft install <source>     Install a skill (local path or owner/repo)
@@ -27,20 +29,34 @@ Usage:
   rolecraft remove <slug>        Remove a skill
   rolecraft update <slug>        Re-install a skill (update to latest)
   rolecraft setup [<source>]     Detect agents and optionally install a skill
+  rolecraft init [<name>]        Scaffold a new SKILL.md
+  rolecraft search <query>       Search for skills on GitHub
   rolecraft help                 Show this help
 
 Options for install:
-  --global     Install to ~/.agents/skills/
-  --project    Install to ./.agents/skills/ (default)
-  --claude     Also install to ~/.claude/skills/
-  --cursor     Also install to ~/.cursor/skills/
-  --windsurf   Also install to ~/.windsurf/skills/ (deprecated: use --devin)
-  --devin      Also install to ~/.devin/skills/
-  --codex      Also install to ~/.codex/skills/
-  --copilot    Also install to ~/.copilot/skills/
-  --aider      Also install to ~/.aider/skills/
-  --cline      Also install to ~/.cline/skills/
-  --all        Install to all locations
+  --global       Install to ~/.agents/skills/
+  --project      Install to ./.agents/skills/ (default)
+  --claude       Also install to ~/.claude/skills/
+  --cursor       Also install to ~/.cursor/skills/
+  --windsurf     Also install to ~/.windsurf/skills/ (deprecated: use --devin)
+  --devin        Also install to ~/.devin/skills/
+  --codex        Also install to ~/.codex/skills/
+  --copilot      Also install to ~/.copilot/skills/
+  --aider        Also install to ~/.aider/skills/
+  --cline        Also install to ~/.cline/skills/
+  --gemini       Also install to ~/.gemini/skills/
+  --cody         Also install to ~/.cody/skills/
+  --continue     Also install to ~/.continue/skills/
+  --warp         Also install to ~/.warp/skills/
+  --codeium      Also install to ~/.codeium/skills/
+  --fabric       Also install to ~/.fabric/skills/
+  --goose        Also install to ~/.goose/skills/
+  --tabnine      Also install to ~/.tabnine/skills/
+  --supermaven   Also install to ~/.supermaven/skills/
+  --pr-pilot     Also install to ~/.pr-pilot/skills/
+  --loom         Also install to ~/.loom/skills/
+  --all          Install to all locations
+  --frozen-lockfile  Fail if skill already installed
 
 Examples:
   rolecraft install ./my-skill
@@ -63,9 +79,9 @@ export async function main() {
       }
 
       const flags = args.slice(1)
-      const knownFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--all']
-      const hasAnyFlag = flags.some(f => knownFlags.includes(f))
-      const options = hasAnyFlag ? {
+      const scopeFlags = ['--global', '--project', '--claude', '--cursor', '--windsurf', '--devin', '--codex', '--copilot', '--aider', '--cline', '--gemini', '--cody', '--continue', '--warp', '--codeium', '--fabric', '--goose', '--tabnine', '--supermaven', '--pr-pilot', '--loom', '--all']
+      const hasScopeFlag = flags.some(f => scopeFlags.includes(f))
+      const options = hasScopeFlag ? {
         global: flags.includes('--global') || flags.includes('--all'),
         claude: flags.includes('--claude') || flags.includes('--all'),
         cursor: flags.includes('--cursor') || flags.includes('--all'),
@@ -75,8 +91,20 @@ export async function main() {
         copilot: flags.includes('--copilot') || flags.includes('--all'),
         aider: flags.includes('--aider') || flags.includes('--all'),
         cline: flags.includes('--cline') || flags.includes('--all'),
+        gemini: flags.includes('--gemini') || flags.includes('--all'),
+        cody: flags.includes('--cody') || flags.includes('--all'),
+        continue: flags.includes('--continue') || flags.includes('--all'),
+        warp: flags.includes('--warp') || flags.includes('--all'),
+        codeium: flags.includes('--codeium') || flags.includes('--all'),
+        fabric: flags.includes('--fabric') || flags.includes('--all'),
+        goose: flags.includes('--goose') || flags.includes('--all'),
+        tabnine: flags.includes('--tabnine') || flags.includes('--all'),
+        supermaven: flags.includes('--supermaven') || flags.includes('--all'),
+        'pr-pilot': flags.includes('--pr-pilot') || flags.includes('--all'),
+        loom: flags.includes('--loom') || flags.includes('--all'),
         project: flags.includes('--project') || flags.includes('--all'),
       } : {}
+      options.frozenLockfile = flags.includes('--frozen-lockfile')
 
       await installCommand(source, options)
       break
@@ -114,6 +142,22 @@ export async function main() {
         process.exit(1)
       }
       await useCommand(source)
+      break
+    }
+
+    case 'init': {
+      const name = args[0]
+      await initCommand(name)
+      break
+    }
+
+    case 'search': {
+      const query = args[0]
+      if (!query) {
+        console.error('Usage: rolecraft search <query>')
+        process.exit(1)
+      }
+      await searchCommand(query)
       break
     }
 

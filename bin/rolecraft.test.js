@@ -315,4 +315,108 @@ describe('rolecraft CLI', () => {
     assert.ok(logs.some(l => l.includes('setup-cli-test')))
     restore()
   })
+
+  it('runs init command without name', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    process.argv = ['node', 'rolecraft', 'init']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Created skill scaffold')))
+    assert.ok(logs.some(l => l.includes('my-skill')))
+    restore()
+    process.cwd = origCwd
+  })
+
+  it('runs init command with name', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    process.argv = ['node', 'rolecraft', 'init', 'my-custom-skill']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('my-custom-skill')))
+    restore()
+    process.cwd = origCwd
+  })
+
+  it('runs init command with namespaced name', async () => {
+    const origCwd = process.cwd
+    process.cwd = () => tempDir
+    process.argv = ['node', 'rolecraft', 'init', 'namespace/my-skill']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('namespace/my-skill')))
+    assert.ok(logs.some(l => l.includes('namespace-my-skill')))
+    restore()
+    process.cwd = origCwd
+  })
+
+  it('errors when search has no query', async () => {
+    process.argv = ['node', 'rolecraft', 'search']
+    const { logs: errors, restore: restoreErr } = capture('error')
+    const restoreExit = mockExit()
+
+    try {
+      await rolecraftModule.main()
+    } catch (e) {
+      assert.ok(e.message.includes('exit:1'))
+    }
+
+    assert.ok(errors.some(e => e.includes('Usage: rolecraft search <query>')))
+    restoreErr()
+    restoreExit()
+  })
+
+  it('handles search rate limit gracefully', async () => {
+    process.argv = ['node', 'rolecraft', 'search', 'test-query']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('rate limit') || l.includes('No skills found') || l.includes('Search results')))
+    restore()
+  })
+
+  it('installs with --frozen-lockfile flag on fresh skill', async () => {
+    const skillDir = join(tempDir, 'fresh-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/fresh\nname: fresh-skill\nContent')
+
+    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--frozen-lockfile']
+    const { logs, restore } = capture('log')
+
+    await rolecraftModule.main()
+
+    assert.ok(logs.some(l => l.includes('Installed')))
+    restore()
+  })
+
+  it('fails with --frozen-lockfile when skill already exists', async () => {
+    const skillDir = join(tempDir, 'dupe-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), '# slug: test/dupe\nname: dupe-skill\nContent')
+
+    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global']
+    await rolecraftModule.main()
+
+    process.argv = ['node', 'rolecraft', 'install', skillDir, '--global', '--frozen-lockfile']
+    const { logs: errors, restore: restoreErr } = capture('error')
+    const restoreExit = mockExit()
+
+    try {
+      await rolecraftModule.main()
+    } catch (e) {
+      assert.ok(e.message.includes('exit:1'), `Expected exit:1 but got: ${e.message}`)
+    }
+
+    assert.ok(errors.some(e => e.includes('already installed')), `Expected 'already installed' in: ${errors.join(', ')}`)
+    restoreErr()
+    restoreExit()
+  })
 })

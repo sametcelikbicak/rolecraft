@@ -11,14 +11,14 @@
 | **Lockfile**                 | agentskill v3  | None               | Two-tier (global v3 + project v1, SHA hashes) | None            | Config files only          |
 | **Offline capable**          | ✅             | ❌ (registry)      | ✅                                            | ✅              | ✅                         |
 | **Signup required**          | ❌             | ✅ (agentskill.sh) | ❌                                            | ❌              | ❌                         |
-| **Agent count**              | **9**          | 20+                | 68+                                           | 3               | ~10                        |
+| **Agent count**              | **20**         | 20+                | 68+                                           | 3               | ~10                        |
 | **Project scope default**    | ✅             | N/A                | ✅                                            | N/A             | N/A                        |
 | **Interactive scope prompt** | ✅             | ❌                 | ❌                                            | N/A             | N/A                        |
 | **Provenance (npm)**         | ✅             | ❌                 | ❌                                            | N/A             | N/A                        |
 | **`use` command**            | ✅             | ❌                 | ✅                                            | ❌              | ❌                         |
 | **`setup` command**          | ✅             | ✅                 | ❌                                            | ❌              | ❌                         |
-| **`init` command**           | ❌             | ❌                 | ✅                                            | ❌              | ❌                         |
-| **`search`/`find` command**  | ❌             | ✅ (`ags search`)  | ✅ (`skills find`)                            | ❌              | ❌                         |
+| **`init` command**           | ✅             | ❌                 | ✅                                            | ❌              | ❌                         |
+| **`search`/`find` command**  | ✅             | ✅ (`ags search`)  | ✅ (`skills find`)                            | ❌              | ❌                         |
 | **Lockfile `ci`/`verify`**   | ❌             | ❌                 | ✅ (`skills ci`, `skills verify`)             | ❌              | ❌                         |
 | **Symlink mode**             | ❌             | ❌                 | ✅                                            | ❌              | ❌                         |
 | **Stars**                    | ~5             | 23                 | 23,476                                        | 14K+            | N/A                        |
@@ -31,25 +31,23 @@
 - **agentskill.sh lockfile compatible** — cross-compatible with ecosystem
 - **Interactive scope prompt** — user-friendly first install
 - **Project scope default** — modern default (v0.2.0)
-- **10 agent targets** — opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline
+- **20 agent targets** — opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom
 
 ## Weaknesses / Gaps
 
-1. **Agent count (9)** — still far behind `skills` (68+) and `ags` (20+)
-2. **No `search` / `find` command** — no built-in skill discovery
-3. **No `init` command** — no SKILL.md scaffolding
-4. **No lockfile integrity** — no SHA hash verification, no `ci`/`verify` mode, no `--frozen-lockfile`
-5. **No symlink mode** — `skills` supports symlink (default) + copy; rolecraft only copies
-6. **Lockfile SHA only `local`** — doesn't store content hashes
+1. **Agent count (20)** — catching up to `ags` (20+) but still far behind `skills` (68+)
+2. **No lockfile integrity** — no SHA hash verification, no `ci`/`verify` mode
+3. **No symlink mode** — `skills` supports symlink (default) + copy; rolecraft only copies
+4. **Lockfile SHA only `local`** — doesn't store content hashes
 
 ## Roadmap
 
-### v0.3.x — Init, Search & Lockfile
+### v0.3.x — Init, Search & Lockfile ✅
 
-- [ ] `rolecraft init [name]` — SKILL.md scaffolding (`skills init` equivalent)
-- [ ] `rolecraft search <query>` — skill discovery via GitHub API (`skills find` equivalent)
-- [ ] 20+ agent targets (agent count parity with `ags`)
-- [ ] `--frozen-lockfile` flag for install
+- [x] `rolecraft init [name]` — SKILL.md scaffolding (`skills init` equivalent)
+- [x] `rolecraft search <query>` — skill discovery via GitHub API (`skills find` equivalent)
+- [x] 20+ agent targets (agent count parity with `ags`) — **20 agents**
+- [x] `--frozen-lockfile` flag for install
 
 ### v0.4.x — Integrity & Performance
 
@@ -77,7 +75,18 @@
 | codex       | `~/.codex/skills/` or `./.codex/skills/`       |
 | copilot     | `~/.copilot/skills/` or `./.copilot/skills/`   |
 | aider       | `~/.aider/skills/` or `./.aider/skills/`       |
-| cline       | `~/.cline/skills/` or `./.cline/skills/`       |
+ | cline       | `~/.cline/skills/` or `./.cline/skills/`       |
+| gemini-cli  | `~/.gemini/skills/`                              |
+| cody        | `~/.cody/skills/`                               |
+| continue    | `~/.continue/skills/`                           |
+| warp        | `~/.warp/skills/`                               |
+| codeium     | `~/.codeium/skills/`                            |
+| fabric      | `~/.fabric/skills/`                             |
+| goose       | `~/.goose/skills/`                              |
+| tabnine     | `~/.tabnine/skills/`                            |
+| supermaven  | `~/.supermaven/skills/`                         |
+| pr-pilot    | `~/.pr-pilot/skills/`                           |
+| loom        | `~/.loom/skills/`                               |
 
 ## Competitor Analysis
 
@@ -96,7 +105,7 @@
 - **Weaknesses**: 1 dep (`yaml`), no provenance, no `setup` command
 - **Deps**: 1
 - **rolecraft advantage**: Zero deps, provenance, `setup` command
-- **rolecraft gap**: No `init`, no `search`, no `ci`/`verify`, low agent count
+- **rolecraft gap**: No `ci`/`verify`, lower agent count (20 vs 68+)
 
 ### OpenCode native
 

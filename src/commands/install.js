@@ -40,8 +40,23 @@ async function askScope() {
 }
 
 export async function installCommand(source, options) {
-  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline
+  const hasScopeFlags = options.global || options.project || options.claude || options.cursor || options.windsurf || options.devin || options.codex || options.copilot || options.aider || options.cline || options.gemini || options.cody || options.continue || options.warp || options.codeium || options.fabric || options.goose || options.tabnine || options.supermaven || options['pr-pilot'] || options.loom
   const scope = hasScopeFlags ? options : await askScope()
+
+  if (options.frozenLockfile) {
+    const { readLock, getProjectLockPath } = await import('../utils/lockfile.js')
+    const [globalLock, projectLock] = await Promise.all([
+      readLock(),
+      readLock(getProjectLockPath(process.cwd())).catch(() => ({ skills: {} })),
+    ])
+    const resolveSource = (await import('../utils/resolver.js')).resolveSource
+    const { slug } = await resolveSource(source)
+    const existing = globalLock.skills[slug] || projectLock.skills[slug]
+    if (existing) {
+      console.error(`Skill "${slug}" already installed. Use \`rolecraft update ${slug}\` to update or omit --frozen-lockfile to overwrite.`)
+      process.exit(1)
+    }
+  }
 
   console.log(`\n🔍 Resolving skill from: ${source}`)
   const resolved = await resolveSource(source)
@@ -62,6 +77,17 @@ export async function installCommand(source, options) {
   if (scope.copilot) targets.push('copilot')
   if (scope.aider) targets.push('aider')
   if (scope.cline) targets.push('cline')
+  if (scope.gemini) targets.push('gemini')
+  if (scope.cody) targets.push('cody')
+  if (scope.continue) targets.push('continue')
+  if (scope.warp) targets.push('warp')
+  if (scope.codeium) targets.push('codeium')
+  if (scope.fabric) targets.push('fabric')
+  if (scope.goose) targets.push('goose')
+  if (scope.tabnine) targets.push('tabnine')
+  if (scope.supermaven) targets.push('supermaven')
+  if (scope['pr-pilot']) targets.push('pr-pilot')
+  if (scope.loom) targets.push('loom')
   if (scope.project) targets.push('project')
 
   const results = await installSkill(resolved, targets)

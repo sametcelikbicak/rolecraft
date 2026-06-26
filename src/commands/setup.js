@@ -1,7 +1,7 @@
 import { accessSync, readdirSync, constants } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir } from '../utils/lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -15,6 +15,17 @@ const KNOWN_AGENTS = [
   { flag: 'aider', label: 'aider', dir: getAiderDir },
   { flag: 'cline', label: 'cline', dir: getClineDir },
   { flag: 'devin', label: 'devin', dir: getDevinDir },
+  { flag: 'gemini', label: 'gemini-cli', dir: getGeminiDir },
+  { flag: 'cody', label: 'cody', dir: getCodyDir },
+  { flag: 'continue', label: 'continue', dir: getContinueDir },
+  { flag: 'warp', label: 'warp', dir: getWarpDir },
+  { flag: 'codeium', label: 'codeium', dir: getCodeiumDir },
+  { flag: 'fabric', label: 'fabric', dir: getFabricDir },
+  { flag: 'goose', label: 'goose', dir: getGooseDir },
+  { flag: 'tabnine', label: 'tabnine', dir: getTabnineDir },
+  { flag: 'supermaven', label: 'supermaven', dir: getSupermavenDir },
+  { flag: 'pr-pilot', label: 'pr-pilot', dir: getPrPilotDir },
+  { flag: 'loom', label: 'loom', dir: getLoomDir },
 ]
 
 export function detectAgents() {
@@ -45,7 +56,8 @@ export async function setupCommand(source) {
     console.log('   No supported agents detected.\n')
     console.log('   rolecraft installs skills into agent skill directories.')
     console.log('   Install an AI coding agent (opencode, claude-code, cursor,')
-    console.log('   windsurf, devin, codex, copilot, aider, cline) first.')
+    console.log('   windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody,')
+    console.log('   continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom) first.')
     return
   }
 

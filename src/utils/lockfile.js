@@ -13,6 +13,17 @@ const COPILOT_DIR = join(homedir(), '.copilot', 'skills')
 const AIDER_DIR = join(homedir(), '.aider', 'skills')
 const CLINE_DIR = join(homedir(), '.cline', 'skills')
 const DEVIN_DIR = join(homedir(), '.devin', 'skills')
+const GEMINI_DIR = join(homedir(), '.gemini', 'skills')
+const CODY_DIR = join(homedir(), '.cody', 'skills')
+const CONTINUE_DIR = join(homedir(), '.continue', 'skills')
+const WARP_DIR = join(homedir(), '.warp', 'skills')
+const CODEIUM_DIR = join(homedir(), '.codeium', 'skills')
+const FABRIC_DIR = join(homedir(), '.fabric', 'skills')
+const GOOSE_DIR = join(homedir(), '.goose', 'skills')
+const TABNINE_DIR = join(homedir(), '.tabnine', 'skills')
+const SUPERMAVEN_DIR = join(homedir(), '.supermaven', 'skills')
+const PR_PILOT_DIR = join(homedir(), '.pr-pilot', 'skills')
+const LOOM_DIR = join(homedir(), '.loom', 'skills')
 
 export function getGlobalLockPath() {
   return GLOBAL_LOCK_PATH
@@ -52,6 +63,50 @@ export function getClineDir() {
 
 export function getDevinDir() {
   return DEVIN_DIR
+}
+
+export function getGeminiDir() {
+  return GEMINI_DIR
+}
+
+export function getCodyDir() {
+  return CODY_DIR
+}
+
+export function getContinueDir() {
+  return CONTINUE_DIR
+}
+
+export function getWarpDir() {
+  return WARP_DIR
+}
+
+export function getCodeiumDir() {
+  return CODEIUM_DIR
+}
+
+export function getFabricDir() {
+  return FABRIC_DIR
+}
+
+export function getGooseDir() {
+  return GOOSE_DIR
+}
+
+export function getTabnineDir() {
+  return TABNINE_DIR
+}
+
+export function getSupermavenDir() {
+  return SUPERMAVEN_DIR
+}
+
+export function getPrPilotDir() {
+  return PR_PILOT_DIR
+}
+
+export function getLoomDir() {
+  return LOOM_DIR
 }
 
 export function getProjectLockPath(cwd) {
