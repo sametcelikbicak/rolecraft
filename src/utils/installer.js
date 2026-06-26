@@ -1,7 +1,7 @@
 import { mkdir, cp, writeFile, readFile, access, stat } from 'node:fs/promises'
 import { join, basename } from 'node:path'
 import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
@@ -59,6 +59,61 @@ export async function installSkill(resolved, targets) {
       case 'devin': {
         baseDir = getDevinDir()
         label = '~/.devin/skills/'
+        break
+      }
+      case 'gemini': {
+        baseDir = getGeminiDir()
+        label = '~/.gemini/skills/'
+        break
+      }
+      case 'cody': {
+        baseDir = getCodyDir()
+        label = '~/.cody/skills/'
+        break
+      }
+      case 'continue': {
+        baseDir = getContinueDir()
+        label = '~/.continue/skills/'
+        break
+      }
+      case 'warp': {
+        baseDir = getWarpDir()
+        label = '~/.warp/skills/'
+        break
+      }
+      case 'codeium': {
+        baseDir = getCodeiumDir()
+        label = '~/.codeium/skills/'
+        break
+      }
+      case 'fabric': {
+        baseDir = getFabricDir()
+        label = '~/.fabric/skills/'
+        break
+      }
+      case 'goose': {
+        baseDir = getGooseDir()
+        label = '~/.goose/skills/'
+        break
+      }
+      case 'tabnine': {
+        baseDir = getTabnineDir()
+        label = '~/.tabnine/skills/'
+        break
+      }
+      case 'supermaven': {
+        baseDir = getSupermavenDir()
+        label = '~/.supermaven/skills/'
+        break
+      }
+      case 'pr-pilot': {
+        baseDir = getPrPilotDir()
+        label = '~/.pr-pilot/skills/'
+        break
+      }
+      case 'loom': {
+        baseDir = getLoomDir()
+        label = '~/.loom/skills/'
         break
       }
       case 'project': {

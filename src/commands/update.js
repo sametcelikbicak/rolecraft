@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir } from '../utils/lockfile.js'
+import { readLock, getGlobalLockPath, getProjectLockPath, getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir } from '../utils/lockfile.js'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -44,6 +44,39 @@ function detectTargets(slug, cwd) {
 
   const devinDir = join(getDevinDir(), normSlug)
   if (existsSync(join(devinDir, 'SKILL.md'))) targets.push('devin')
+
+  const geminiDir = join(getGeminiDir(), normSlug)
+  if (existsSync(join(geminiDir, 'SKILL.md'))) targets.push('gemini')
+
+  const codyDir = join(getCodyDir(), normSlug)
+  if (existsSync(join(codyDir, 'SKILL.md'))) targets.push('cody')
+
+  const continueDir = join(getContinueDir(), normSlug)
+  if (existsSync(join(continueDir, 'SKILL.md'))) targets.push('continue')
+
+  const warpDir = join(getWarpDir(), normSlug)
+  if (existsSync(join(warpDir, 'SKILL.md'))) targets.push('warp')
+
+  const codeiumDir = join(getCodeiumDir(), normSlug)
+  if (existsSync(join(codeiumDir, 'SKILL.md'))) targets.push('codeium')
+
+  const fabricDir = join(getFabricDir(), normSlug)
+  if (existsSync(join(fabricDir, 'SKILL.md'))) targets.push('fabric')
+
+  const gooseDir = join(getGooseDir(), normSlug)
+  if (existsSync(join(gooseDir, 'SKILL.md'))) targets.push('goose')
+
+  const tabnineDir = join(getTabnineDir(), normSlug)
+  if (existsSync(join(tabnineDir, 'SKILL.md'))) targets.push('tabnine')
+
+  const supermavenDir = join(getSupermavenDir(), normSlug)
+  if (existsSync(join(supermavenDir, 'SKILL.md'))) targets.push('supermaven')
+
+  const prPilotDir = join(getPrPilotDir(), normSlug)
+  if (existsSync(join(prPilotDir, 'SKILL.md'))) targets.push('pr-pilot')
+
+  const loomDir = join(getLoomDir(), normSlug)
+  if (existsSync(join(loomDir, 'SKILL.md'))) targets.push('loom')
 
   const projectDir = join(cwd, '.agents', 'skills', normSlug)
   if (existsSync(join(projectDir, 'SKILL.md'))) targets.push('project')

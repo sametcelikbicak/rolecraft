@@ -14,7 +14,7 @@
 
 **Zero-dependency** CLI to install AI agent skills as roles & behaviors from any source. No marketplace, no registry, no signup — just point it at a local folder or a GitHub repo and it works.
 
-Works with **opencode**, **claude-code**, **cursor**, **windsurf** (deprecated → **devin**), **codex**, **copilot**, **aider**, **cline**, and all spec-compliant agents.
+Works with **20 agents**: opencode, claude-code, cursor, windsurf, devin, codex, copilot, aider, cline, gemini-cli, cody, continue, warp, codeium, fabric, goose, tabnine, supermaven, pr-pilot, loom, and all spec-compliant agents.
 
 ## Why rolecraft?
 
@@ -23,12 +23,15 @@ Works with **opencode**, **claude-code**, **cursor**, **windsurf** (deprecated �
 | Zero dependencies                 | ✅               | ✅              | ❌ (2)               |
 | Local path install                | ✅ **1st class** | ❌ GitHub only  | ❌ marketplace only  |
 | GitHub repo install               | ✅               | ✅              | ❌                   |
-| Agent targets                     | 10               | 68+             | 20+                  |
+| Agent targets                     | 20               | 68+             | 20+                  |
+| SKILL.md scaffolding              | ✅               | ✅              | ❌                   |
+| Skill discovery (search)          | ✅               | ✅              | ✅                   |
 | Offline capable                   | ✅               | ❌              | ❌                   |
 | agentskill.sh lockfile compatible | ✅               | ✅              | ✅                   |
 | Project-level install             | ✅               | ✅              | ✅                   |
+| Lockfile integrity (`--frozen-lockfile`) | ✅        | ❌              | ❌                   |
 | npm provenance                    | ✅               | ❌              | ❌                   |
-| File size                         | ~3 KB            | ~500 KB+        | ~84 KB               |
+| File size                         | ~4 KB            | ~500 KB+        | ~84 KB               |
 
 ## Install
 
@@ -41,9 +44,11 @@ npx rolecraft install <source>
 ## Usage
 
 ```bash
+rolecraft init my-skill                            # scaffold a new SKILL.md
 rolecraft install ./path/to/my-skill              # install from local folder
 rolecraft install sametcelikbicak/task-decomposer  # install from GitHub
 rolecraft install ./my-skill --claude --cursor     # install for specific agents
+rolecraft search code-review                       # search skills on GitHub
 rolecraft use sametcelikbicak/task-decomposer      # preview without installing
 rolecraft setup                                    # detect installed agents
 rolecraft setup ./my-skill                         # detect + install to all agents
@@ -69,17 +74,29 @@ Where do you want to install this skill?
 Select specific agents with flags:
 
 ```bash
-rolecraft install ./my-skill --project   # ./.agents/skills/ (default)
-rolecraft install ./my-skill --global    # ~/.agents/skills/
-rolecraft install ./my-skill --claude    # also ~/.claude/skills/
-rolecraft install ./my-skill --cursor    # also ~/.cursor/skills/
-rolecraft install ./my-skill --windsurf  # also ~/.windsurf/skills/ (deprecated: use --devin)
-rolecraft install ./my-skill --devin     # also ~/.devin/skills/
-rolecraft install ./my-skill --codex     # also ~/.codex/skills/
-rolecraft install ./my-skill --copilot   # also ~/.copilot/skills/
-rolecraft install ./my-skill --aider     # also ~/.aider/skills/
-rolecraft install ./my-skill --cline     # also ~/.cline/skills/
-rolecraft install ./my-skill --all       # all locations
+rolecraft install ./my-skill --project      # ./.agents/skills/ (default)
+rolecraft install ./my-skill --global       # ~/.agents/skills/
+rolecraft install ./my-skill --claude       # also ~/.claude/skills/
+rolecraft install ./my-skill --cursor       # also ~/.cursor/skills/
+rolecraft install ./my-skill --windsurf     # also ~/.windsurf/skills/ (deprecated: use --devin)
+rolecraft install ./my-skill --devin        # also ~/.devin/skills/
+rolecraft install ./my-skill --codex        # also ~/.codex/skills/
+rolecraft install ./my-skill --copilot      # also ~/.copilot/skills/
+rolecraft install ./my-skill --aider        # also ~/.aider/skills/
+rolecraft install ./my-skill --cline        # also ~/.cline/skills/
+rolecraft install ./my-skill --gemini       # also ~/.gemini/skills/
+rolecraft install ./my-skill --cody         # also ~/.cody/skills/
+rolecraft install ./my-skill --continue     # also ~/.continue/skills/
+rolecraft install ./my-skill --warp         # also ~/.warp/skills/
+rolecraft install ./my-skill --codeium      # also ~/.codeium/skills/
+rolecraft install ./my-skill --fabric       # also ~/.fabric/skills/
+rolecraft install ./my-skill --goose        # also ~/.goose/skills/
+rolecraft install ./my-skill --tabnine      # also ~/.tabnine/skills/
+rolecraft install ./my-skill --supermaven   # also ~/.supermaven/skills/
+rolecraft install ./my-skill --pr-pilot     # also ~/.pr-pilot/skills/
+rolecraft install ./my-skill --loom         # also ~/.loom/skills/
+rolecraft install ./my-skill --all          # all locations
+rolecraft install ./my-skill --frozen-lockfile  # fail if skill is already installed
 ```
 
 Combine flags to install to multiple agents:
@@ -87,6 +104,26 @@ Combine flags to install to multiple agents:
 ```bash
 rolecraft install ./my-skill --claude --cursor --devin
 ```
+
+### Scaffold a new skill
+
+```bash
+rolecraft init                    # create ./SKILL.md (default: my-skill)
+rolecraft init my-custom-tool     # create ./my-custom-tool/SKILL.md
+rolecraft init namespace/skill    # create ./namespace-skill/SKILL.md
+```
+
+The `init` command generates a ready-to-edit `SKILL.md` with proper slug, name, and owner metadata. Edit it with your skill instructions, then install with `rolecraft install <dir>`.
+
+### Search for skills on GitHub
+
+```bash
+rolecraft search code-review                  # search by keyword
+rolecraft search "code review typescript"     # multi-word search
+rolecraft search prompt                       # search for prompt skills
+```
+
+The `search` command queries the GitHub API for repositories containing `SKILL.md` files matching your query. Results include stars, language, and the exact install command.
 
 ### Preview a skill without installing
 
@@ -146,20 +183,33 @@ The CLI clones with `--depth 1`, finds `SKILL.md` recursively, installs it, and 
 | copilot     | `~/.copilot/skills/` or `./.copilot/skills/` |
 | aider       | `~/.aider/skills/` or `./.aider/skills/`    |
 | cline       | `~/.cline/skills/` or `./.cline/skills/`    |
+| gemini-cli  | `~/.gemini/skills/`                          |
+| cody        | `~/.cody/skills/`                            |
+| continue    | `~/.continue/skills/`                        |
+| warp        | `~/.warp/skills/`                            |
+| codeium     | `~/.codeium/skills/`                         |
+| fabric      | `~/.fabric/skills/`                          |
+| goose       | `~/.goose/skills/`                           |
+| tabnine     | `~/.tabnine/skills/`                         |
+| supermaven  | `~/.supermaven/skills/`                      |
+| pr-pilot    | `~/.pr-pilot/skills/`                        |
+| loom        | `~/.loom/skills/`                            |
 
 > ⚠️ Windsurf was rebranded to **Devin Desktop** in June 2026. The `--windsurf` flag and `~/.windsurf/skills/` path still work for backward compatibility, but new deployments should use `--devin` / `~/.devin/skills/`.
 
 Install to multiple agents at once:
 
 ```bash
-rolecraft install ./my-skill --cursor --devin --copilot
+rolecraft install ./my-skill --cursor --devin --copilot --gemini --cody
 ```
 
 ## Commands
 
 | Command                      | Description                                              |
 | ---------------------------- | -------------------------------------------------------- |
+| `rolecraft init [<name>]`    | Scaffold a new `SKILL.md`                                |
 | `rolecraft install <source>` | Install a skill (local path or GitHub `owner/repo`)      |
+| `rolecraft search <query>`   | Search for skills on GitHub                              |
 | `rolecraft use <source>`     | Preview a skill's files without installing               |
 | `rolecraft setup [<source>]` | Detect agents, optionally install a skill to all         |
 | `rolecraft list`             | Show all installed skills                                |
@@ -175,9 +225,11 @@ rolecraft/
 ├── bin/rolecraft.js          # CLI entry point
 ├── src/
 │   ├── commands/
+│   │   ├── init.js           # SKILL.md scaffolding
 │   │   ├── install.js        # install logic + interactive scope
 │   │   ├── list.js           # list installed skills
 │   │   ├── remove.js         # remove skill + lockfile cleanup
+│   │   ├── search.js         # GitHub skill discovery
 │   │   ├── setup.js          # detect agents + install to all
 │   │   ├── update.js         # re-install skill to latest
 │   │   └── use.js            # preview skill without installing
