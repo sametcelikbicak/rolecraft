@@ -11,7 +11,12 @@ function normalizeSlug(slug) {
 function findActualSlug(slug, lock) {
   if (lock.skills[slug]) return slug
   const normalized = normalizeSlug(slug)
-  return Object.keys(lock.skills).find(k => normalizeSlug(k) === normalized)
+  let found = Object.keys(lock.skills).find(k => normalizeSlug(k) === normalized)
+  if (found) return found
+  return Object.keys(lock.skills).find(k => {
+    const namePart = k.split('/').pop()
+    return namePart === slug || normalizeSlug(namePart) === normalized
+  })
 }
 
 function detectTargets(slug, cwd) {

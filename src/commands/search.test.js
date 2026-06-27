@@ -24,6 +24,19 @@ function mockFetch(status, body) {
   }))
 }
 
+function mockSequentialFetch(responses) {
+  let idx = 0
+  searchModule.setFetch(() => {
+    const resp = responses[idx]
+    if (resp) idx++
+    return Promise.resolve({
+      status: resp?.status || 200,
+      ok: resp?.status ? (resp.status >= 200 && resp.status < 300) : true,
+      json: () => Promise.resolve(resp?.body || {}),
+    })
+  })
+}
+
 describe('search command', () => {
   after(() => {
     searchModule.setFetch(globalThis.fetch)
@@ -87,6 +100,35 @@ describe('search command', () => {
       () => searchModule.searchCommand('test'),
       /Failed to search GitHub/,
     )
+  })
+
+  it('shows repo from lookup when owner/repo query has no SKILL.md search results', async () => {
+    mockSequentialFetch([
+      { status: 200, body: { full_name: 'owner/skill-repo', description: 'A skill repo', stargazers_count: 10, language: 'TypeScript' } },
+      { status: 200, body: { items: [] } },
+    ])
+
+    const { logs, restore } = capture('log')
+    await searchModule.searchCommand('owner/skill-repo')
+    restore()
+
+    assert.ok(logs.some(l => l.includes('owner/skill-repo')))
+    assert.ok(logs.some(l => l.includes('A skill repo')))
+    assert.ok(logs.some(l => l.includes('10')))
+  })
+
+  it('falls back to broader search when lookup fails', async () => {
+    mockSequentialFetch([
+      { status: 404, body: {} },
+      { status: 200, body: { items: [] } },
+      { status: 200, body: { items: [] } },
+    ])
+
+    const { logs, restore } = capture('log')
+    await searchModule.searchCommand('owner/skill-repo')
+    restore()
+
+    assert.ok(logs.some(l => l.includes('No skills found')))
   })
 
   describe('interactive mode', () => {

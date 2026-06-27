@@ -1,15 +1,49 @@
-import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink } from 'node:fs/promises'
+import { mkdir, cp, writeFile, readFile, access, stat, symlink, unlink, rm } from 'node:fs/promises'
 import { join, basename, relative, dirname } from 'node:path'
 import { homedir } from 'node:os'
-import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, addSkillToLock, getGlobalLockPath, getProjectLockPath } from './lockfile.js'
+import { getAgentsDir, getClaudeDir, getCursorDir, getWindsurfDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getDevinDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir, addSkillToLock, getGlobalLockPath, getProjectLockPath, computeFileHashes } from './lockfile.js'
 
 function normalizeSlug(slug) {
   return slug.replace(/\//g, '-')
 }
 
+const targetToAgentName = {
+  agents: 'opencode',
+  claude: 'claude-code',
+  cursor: 'cursor',
+  windsurf: 'windsurf',
+  devin: 'devin',
+  codex: 'codex',
+  copilot: 'copilot',
+  aider: 'aider',
+  cline: 'cline',
+  gemini: 'gemini-cli',
+  cody: 'cody',
+  continue: 'continue',
+  warp: 'warp',
+  codeium: 'codeium',
+  fabric: 'fabric',
+  goose: 'goose',
+  tabnine: 'tabnine',
+  supermaven: 'supermaven',
+  'pr-pilot': 'pr-pilot',
+  loom: 'loom',
+  roo: 'roo',
+  trae: 'trae',
+  hermes: 'hermes',
+  kiro: 'kiro',
+  augment: 'augment',
+  kilo: 'kilo',
+  openhands: 'openhands',
+  junie: 'junie',
+  factory: 'factory',
+}
+
 export async function installSkill(resolved, targets, mode = 'copy') {
   const slug = resolved.slug
   const results = []
+
+  const agentNames = targets.map(t => targetToAgentName[t] || t)
 
   for (const target of targets) {
     let baseDir
@@ -175,9 +209,8 @@ export async function installSkill(resolved, targets, mode = 'copy') {
 
     if (mode === 'symlink' && resolved.skillDir) {
       const relPath = relative(dirname(slugDir), resolved.skillDir)
-      try {
-        await unlink(slugDir)
-      } catch {}
+      await rm(slugDir, { recursive: true, force: true })
+      await mkdir(dirname(slugDir), { recursive: true })
       await symlink(relPath, slugDir)
     } else {
       await mkdir(slugDir, { recursive: true })
@@ -204,8 +237,9 @@ export async function installSkill(resolved, targets, mode = 'copy') {
     await addSkillToLock(slug, {
       slug,
       contentSha: resolved.contentSha,
+      fileHashes: resolved.fileContents ? computeFileHashes(resolved.fileContents) : undefined,
       installedAt: new Date().toISOString(),
-      agents: ['opencode', 'claude-code'],
+      agents: agentNames,
       source: resolved.sourcePath,
       sourceType: resolved.sourceType,
     }, lockPath)

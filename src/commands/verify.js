@@ -1,6 +1,75 @@
-import { readLock, getProjectLockPath, computeContentHash, getAgentsDir } from '../utils/lockfile.js'
+import { readLock, getProjectLockPath, computeContentHash, computeFileHashes, getAgentsDir, getClaudeDir, getCursorDir, getDevinDir, getCodexDir, getCopilotDir, getAiderDir, getClineDir, getGeminiDir, getCodyDir, getContinueDir, getWarpDir, getCodeiumDir, getFabricDir, getGooseDir, getTabnineDir, getSupermavenDir, getPrPilotDir, getLoomDir, getRooDir, getTraeDir, getHermesDir, getKiroDir, getAugmentDir, getKiloDir, getOpenHandsDir, getJunieDir, getFactoryDir } from '../utils/lockfile.js'
 import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
+import { createHash } from 'node:crypto'
+
+const agentDirMap = {
+  'opencode': getAgentsDir,
+  'claude-code': getClaudeDir,
+  'cursor': getCursorDir,
+  'devin': getDevinDir,
+  'codex': getCodexDir,
+  'copilot': getCopilotDir,
+  'aider': getAiderDir,
+  'cline': getClineDir,
+  'gemini-cli': getGeminiDir,
+  'cody': getCodyDir,
+  'continue': getContinueDir,
+  'warp': getWarpDir,
+  'codeium': getCodeiumDir,
+  'fabric': getFabricDir,
+  'goose': getGooseDir,
+  'tabnine': getTabnineDir,
+  'supermaven': getSupermavenDir,
+  'pr-pilot': getPrPilotDir,
+  'loom': getLoomDir,
+  'roo': getRooDir,
+  'trae': getTraeDir,
+  'hermes': getHermesDir,
+  'kiro': getKiroDir,
+  'augment': getAugmentDir,
+  'kilo': getKiloDir,
+  'openhands': getOpenHandsDir,
+  'junie': getJunieDir,
+  'factory': getFactoryDir,
+}
+
+async function readFilesFromDir(dir) {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true })
+    const fc = {}
+    for (const e of entries) {
+      if (e.isFile()) fc[e.name] = await readFile(join(dir, e.name), 'utf-8')
+    }
+    return Object.keys(fc).length > 0 ? fc : null
+  } catch {}
+  return null
+}
+
+function findFileChanges(installedFiles, expectedHashes) {
+  const changes = []
+  const expectedFiles = expectedHashes ? Object.keys(expectedHashes) : []
+  const installedNames = Object.keys(installedFiles)
+
+  for (const name of installedNames) {
+    if (expectedHashes && expectedHashes[name] !== undefined) {
+      const currentHash = createHash('sha256').update(installedFiles[name]).digest('hex')
+      if (currentHash !== expectedHashes[name]) {
+        changes.push(`modified: ${name}`)
+      }
+    } else {
+      changes.push(`added: ${name}`)
+    }
+  }
+
+  for (const name of expectedFiles) {
+    if (!installedNames.includes(name)) {
+      changes.push(`missing: ${name}`)
+    }
+  }
+
+  return changes
+}
 
 export async function verifyCommand(frozen) {
   const [globalLock, projectLock] = await Promise.all([
@@ -32,42 +101,46 @@ export async function verifyCommand(frozen) {
     }
 
     const normSlug = slug.replace(/\//g, '-')
-    let installedHash = null
+    const dirsToCheck = (entry.agents || []).map(name => {
+      if (name === 'project') return join(process.cwd(), '.agents', 'skills', normSlug)
+      const dirFn = agentDirMap[name]
+      return dirFn ? join(dirFn(), normSlug) : null
+    }).filter(Boolean)
 
-    const globalDir = join(getAgentsDir(), normSlug)
-    try {
-      const entries2 = await readdir(globalDir, { withFileTypes: true })
-      const fc = {}
-      for (const e of entries2) {
-        if (e.isFile()) fc[e.name] = await readFile(join(globalDir, e.name), 'utf-8')
-      }
-      if (Object.keys(fc).length > 0) installedHash = computeContentHash(fc)
-    } catch {}
-
-    if (!installedHash) {
-      const projectDir = join(process.cwd(), '.agents', 'skills', normSlug)
-      try {
-        const entries2 = await readdir(projectDir, { withFileTypes: true })
-        const fc = {}
-        for (const e of entries2) {
-          if (e.isFile()) fc[e.name] = await readFile(join(projectDir, e.name), 'utf-8')
-        }
-        if (Object.keys(fc).length > 0) installedHash = computeContentHash(fc)
-      } catch {}
+    if (dirsToCheck.length === 0) {
+      dirsToCheck.push(
+        join(getAgentsDir(), normSlug),
+        join(process.cwd(), '.agents', 'skills', normSlug),
+      )
     }
 
-    if (!installedHash) {
+    let foundAny = false
+    let allMatch = true
+
+    for (const dir of dirsToCheck) {
+      const fc = await readFilesFromDir(dir)
+      if (fc === null) continue
+
+      foundAny = true
+      const hash = computeContentHash(fc)
+      if (hash !== entry.contentSha) {
+        const changes = findFileChanges(fc, entry.fileHashes)
+        const detail = changes.length > 0 ? ` (${changes.join(', ')})` : ''
+        console.error(`   ❌ ${slug}: hash mismatch in ${dir}${detail}`)
+        allMatch = false
+        allPassed = false
+      }
+    }
+
+    if (!foundAny) {
       console.error(`   ❌ ${slug}: skill directory not found`)
       allPassed = false
       continue
     }
 
-    totalChecked++
-    if (installedHash === entry.contentSha) {
+    if (allMatch) {
+      totalChecked++
       console.log(`   ✅ ${slug} (hash match)`)
-    } else {
-      console.error(`   ❌ ${slug}: hash mismatch (expected ${entry.contentSha}, got ${installedHash})`)
-      allPassed = false
     }
   }
 

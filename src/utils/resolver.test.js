@@ -211,6 +211,41 @@ describe('resolver', () => {
       assert.equal(r.slug, 'unknown')
       assert.equal(r.owner, 'local')
     })
+
+    it('parses YAML frontmatter with --- delimiters', async () => {
+      const d = join(tempDir, 'meta4')
+      mkdirSync(d, { recursive: true })
+      writeFileSync(join(d, 'SKILL.md'), `---
+name: my-skill
+slug: my-org/my-skill
+owner: my-org
+description: A test skill
+---
+
+Content here
+`)
+      const r = await resolverModule.resolveSource(d)
+      assert.equal(r.name, 'my-skill')
+      assert.equal(r.slug, 'my-org/my-skill')
+      assert.equal(r.owner, 'my-org')
+      assert.equal(r.description, 'A test skill')
+    })
+
+    it('parses YAML frontmatter without slug/owner (falls back to defaults)', async () => {
+      const d = join(tempDir, 'meta5')
+      mkdirSync(d, { recursive: true })
+      writeFileSync(join(d, 'SKILL.md'), `---
+name: simple-skill
+---
+
+Just content
+`)
+      const r = await resolverModule.resolveSource(d)
+      assert.equal(r.name, 'simple-skill')
+      assert.equal(r.slug, 'simple-skill')
+      assert.equal(r.owner, 'local')
+      assert.equal(r.description, undefined)
+    })
   })
 
   describe('resolveGitHub', () => {

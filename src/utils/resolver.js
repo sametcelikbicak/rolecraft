@@ -4,7 +4,7 @@ import { tmpdir, homedir } from 'node:os'
 import { execSync as defaultExecSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { readdirSync, readFileSync } from 'node:fs'
-import { computeContentHash } from './lockfile.js'
+import { computeContentHash, computeFileHashes } from './lockfile.js'
 
 let runExec = defaultExecSync
 
@@ -21,15 +21,33 @@ function isLocalPath(source) {
 }
 
 function parseMetadata(content) {
-  const slugMatch = content.match(/^# slug:\s*(\S+)$/m)
-  const nameMatch = content.match(/^name:\s*(\S+)$/m)
-  const ownerMatch = content.match(/^# owner:\s*(\S+)$/m)
+  let name, slug, owner, description
 
-  const name = nameMatch?.[1] || slugMatch?.[1]?.split('/')?.[1] || 'unknown'
-  const slug = slugMatch?.[1] || name
-  const owner = ownerMatch?.[1] || 'local'
+  const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/)
+  if (frontmatterMatch) {
+    const yaml = frontmatterMatch[1]
+    const nameMatch = yaml.match(/^name:\s*(.+)$/m)
+    const slugMatch = yaml.match(/^slug:\s*(\S+)$/m)
+    const ownerMatch = yaml.match(/^owner:\s*(\S+)$/m)
+    const descMatch = yaml.match(/^description:\s*(.+)$/m)
 
-  return { name, slug, owner }
+    name = nameMatch?.[1]?.trim() || 'unknown'
+    slug = slugMatch?.[1] || name
+    owner = ownerMatch?.[1] || 'local'
+    description = descMatch?.[1]?.trim() || undefined
+  }
+
+  if (!slug) {
+    const oldSlugMatch = content.match(/^# slug:\s*(\S+)$/m)
+    const oldNameMatch = content.match(/^name:\s*(\S+)$/m)
+    const oldOwnerMatch = content.match(/^# owner:\s*(\S+)$/m)
+
+    name = oldNameMatch?.[1] || oldSlugMatch?.[1]?.split('/')?.[1] || 'unknown'
+    slug = oldSlugMatch?.[1] || name
+    owner = oldOwnerMatch?.[1] || 'local'
+  }
+
+  return { name, slug, owner, description }
 }
 
 function scanForSkill(dir, maxDepth = 3) {

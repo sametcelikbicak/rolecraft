@@ -82,4 +82,24 @@ describe('use command', () => {
     assert.ok(logs.some(l => l.includes('with-nl')))
     assert.ok(logs.some(l => l.includes('Content')))
   })
+
+  it('shows description when present in YAML frontmatter', async () => {
+    const skillDir = join(tempDir, 'desc-skill')
+    mkdirSync(skillDir, { recursive: true })
+    writeFileSync(join(skillDir, 'SKILL.md'), `---
+name: desc-skill
+slug: desc/skill
+description: A skill with description
+---
+
+Content here
+`)
+
+    capture()
+    await useModule.useCommand(skillDir)
+    restoreLog()
+
+    assert.ok(logs.some(l => l.includes('A skill with description')))
+    assert.ok(logs.some(l => l.includes('desc/skill')))
+  })
 })
