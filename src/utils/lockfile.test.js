@@ -60,6 +60,17 @@ describe('lockfile', () => {
     assert.ok(lock.skills['test/skill'].installedAt)
   })
 
+  it('addSkillToLock merges agents instead of overwriting', async () => {
+    await lockModule.addSkillToLock('merge-skill', { agents: ['claude-code'] })
+    await lockModule.addSkillToLock('merge-skill', { agents: ['cursor', 'warp'] })
+    const lock = await lockModule.readLock()
+    const agents = lock.skills['merge-skill'].agents
+    assert.ok(agents.includes('claude-code'))
+    assert.ok(agents.includes('cursor'))
+    assert.ok(agents.includes('warp'))
+    assert.equal(agents.length, 3)
+  })
+
   it('removeSkillFromLock removes entry', async () => {
     await lockModule.addSkillToLock('to-remove', {})
     await lockModule.removeSkillFromLock('to-remove')

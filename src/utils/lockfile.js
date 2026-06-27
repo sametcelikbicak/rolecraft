@@ -151,7 +151,11 @@ export async function writeLock(data, lockPath = getGlobalLockPath()) {
 
 export async function addSkillToLock(slug, entry, lockPath = getGlobalLockPath()) {
   const lock = await readLock(lockPath)
-  lock.skills[slug] = { ...entry, installedAt: new Date().toISOString() }
+  const existing = lock.skills[slug]
+  const mergedAgents = existing?.agents
+    ? [...new Set([...existing.agents, ...(entry.agents || [])])]
+    : (entry.agents || [])
+  lock.skills[slug] = { ...entry, agents: mergedAgents, installedAt: new Date().toISOString() }
   await writeLock(lock, lockPath)
   return lock
 }
@@ -171,6 +175,14 @@ export function computeContentHash(fileContents) {
     hash.update(fileContents[name])
   }
   return hash.digest('hex')
+}
+
+export function computeFileHashes(fileContents) {
+  const hashes = {}
+  for (const [name, content] of Object.entries(fileContents)) {
+    hashes[name] = createHash('sha256').update(content).digest('hex')
+  }
+  return hashes
 }
 
 
