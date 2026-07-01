@@ -13,7 +13,7 @@
 | **Signup required**          | ❌             | ❌                                        | ✅ (agentskill.sh)        | ❌                | ❌                  | ❌                | ❌              | ❌           |
 | **Agent count**              | **43**         | 72                                        | 15+                      | 10+               | 10+                 | 39                | 1 (+ compat)    | 1 (+ plugins) |
 | **Project scope default**    | ✅             | ✅                                        | N/A                      | ❌ (global)        | ✅ (project)        | ✅                | N/A             | N/A         |
-| **Interactive scope prompt** | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
+| **Interactive scope prompt** | ✅             | ✅                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
 | **Provenance (npm)**         | ✅             | ❌                                        | ❌                       | ❌                | ❌                  | ❌                | N/A             | N/A         |
 | **`use` command**            | ✅             | ✅                                        | ❌                       | ✅ (`read`)        | ❌                  | ✅                | ❌              | ❌          |
 | **`setup` command**          | ✅             | ❌                                        | ✅                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
@@ -29,7 +29,7 @@
 | **`doctor` command**             | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
 | **`upgrade` (self-update)**  | ❌             | ❌                                        | ❌                       | ❌                | ❌                  | ✅                | ❌              | ❌          |
 | **TUI search**               | ⚠️ (styled)   | ✅ (`skills find` interactive)            | ❌                       | ❌                | ❌                  | ❌                | ❌              | ❌          |
-| **Stars**                    | ~5             | 23,588                                    | 23                       | 10,500            | 472                 | ~1                | 178K+           | 133K+       |
+| **Stars**                    | 34             | 24,613                                    | 23                       | 10,525            | 480                 | ~1                | 13K+           | 135K+       |
 
 ## Strengths
 
@@ -90,6 +90,7 @@
 - [ ] GitLab URL support (`https://gitlab.com/org/repo`)
 - [ ] SSH git URL support (`git@github.com:owner/repo.git`)
 - [ ] Full git URL support (any remote with SKILL.md)
+- [ ] 10+ new agent targets to match `skills` (72)
 - [ ] `rolecraft doctor` — system health check
 
 ### v0.6.x — UX & Shell Integration
@@ -183,3 +184,4 @@
 3. **Interactive scope prompt** — best UX for first-time users
 4. **Bundle system** — unique multi-skill install from files/inline
 5. **Dry-run + Verify + CI** — complete integrity workflow unmatched by most competitors
+6. **Corrected Copilot path** — now uses `.github/copilot/skills/` matching GitHub's official standard
