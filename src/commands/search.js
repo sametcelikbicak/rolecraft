@@ -44,22 +44,23 @@ function pickAndInstallTUI(items) {
 
     let selected = 0
     const total = items.length
+    const altScreen = `${ESC}[?1049h`
+    const normalScreen = `${ESC}[?1049l`
+    const cursorHome = `${ESC}H`
 
     emitKeypressEvents(input)
 
     function render() {
-      const listRows = total * 2 + 1
-      let buf = `${CSI}u`
+      let buf = cursorHome
+      buf += `${bold('Select a skill (\u2191/\u2193 navigate, Enter install, q quit):')}\n\n`
       for (let i = 0; i < total; i++) {
-        const prefix = i === selected ? `${green('▸')} ${cyan(bold(String(i + 1).padStart(2, ' ')))}` : `  ${dim(String(i + 1).padStart(2, ' '))}`
-        const suffix = i === selected ? ` ${green('◀ install')}` : ''
+        const prefix = i === selected ? `${green('\u25b6')} ${cyan(bold(String(i + 1).padStart(2, ' ')))}` : `  ${dim(String(i + 1).padStart(2, ' '))}`
+        const suffix = i === selected ? ` ${green('\u25c0 install')}` : ''
         const line = formatRepo(items[i]).split('\n')
-        buf += `${prefix} ${line[0]}${suffix}${CSI}K\n`
-        buf += `   ${line[1]}${CSI}K\n`
+        buf += `${prefix} ${line[0]}${suffix}\n`
+        buf += `   ${line[1]}\n`
       }
-      buf += `${CSI}K`
-      buf += `\n${dim('q')} quit \u2191/\u2193 navigate ${dim('Enter')} install${CSI}K\n`
-      buf += `${CSI}J`
+      buf += `\n${dim('q')} quit \u2191/\u2193 navigate ${dim('Enter')} install\n`
       output.write(buf)
     }
 
@@ -91,19 +92,19 @@ function pickAndInstallTUI(items) {
       try { input.off('keypress', onKeypress) } catch {}
       try { input.setRawMode(false) } catch {}
       try { input.pause() } catch {}
+      output.write(normalScreen)
       cursorShow()
-      output.write(`\n`)
     }
 
-    cursorHide()
-    output.write(`\n${bold('Select a skill to install (\u2191/\u2193 to navigate, Enter to select, q to quit):')}\n\n${CSI}s`)
-
     try {
+      output.write(altScreen)
+      cursorHide()
       input.setRawMode(true)
       input.resume()
       input.on('keypress', onKeypress)
     } catch {
       try { input.pause() } catch {}
+      output.write(normalScreen)
       cursorShow()
       resolve(null)
       return
