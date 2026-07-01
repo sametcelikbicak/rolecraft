@@ -1,4 +1,5 @@
 import { stdin as input, stdout as output } from 'node:process'
+import { emitKeypressEvents } from 'node:readline'
 import { resolveSource } from '../utils/resolver.js'
 import { installSkill } from '../utils/installer.js'
 
@@ -65,25 +66,26 @@ function pickAndInstallTUI(items) {
       output.write(`\n  ${dim('q')} quit · ${dim('↑/↓')} navigate · ${dim('Enter')} install\n`)
     }
 
-    render()
+    emitKeypressEvents(input)
 
-    function onData(key) {
-      if (key === 'q' || key === 'Q') {
+    function onKeypress(str, key) {
+      if (!key) return
+      if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
         cleanup()
         resolve(null)
         return
       }
-      if (key === '\x1b[A' || key === 'k') {
+      if (key.name === 'up' || key.name === 'k') {
         selected = selected > 0 ? selected - 1 : total - 1
         render()
         return
       }
-      if (key === '\x1b[B' || key === 'j') {
+      if (key.name === 'down' || key.name === 'j') {
         selected = selected < total - 1 ? selected + 1 : 0
         render()
         return
       }
-      if (key === '\r' || key === '\n') {
+      if (key.name === 'return' || key.name === 'enter') {
         cleanup()
         resolve(items[selected])
         return
@@ -91,7 +93,7 @@ function pickAndInstallTUI(items) {
     }
 
     function cleanup() {
-      try { input.removeListener('data', onData) } catch {}
+      try { input.off('keypress', onKeypress) } catch {}
       try { input.setRawMode(false) } catch {}
       cursorShow()
       output.write('\n')
@@ -100,7 +102,7 @@ function pickAndInstallTUI(items) {
     try {
       input.setRawMode(true)
       input.resume()
-      input.on('data', onData)
+      input.on('keypress', onKeypress)
     } catch {
       try { input.pause() } catch {}
       cursorShow()
