@@ -18,6 +18,11 @@
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/📜-Changelog-blue" alt="Changelog"></a>
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/🤝-Contributing-green" alt="Contributing"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
+  <a href="package.json"><img src="https://img.shields.io/node/v/rolecraft" alt="Node"></a>
+</p>
+
+<p align="center">
+  <a href="https://www.producthunt.com/products/rolecraft?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-rolecraft" target="_blank" rel="noopener noreferrer"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1184576&theme=light&t=1782890843931" alt="Product Hunt" width="200"></a>
 </p>
 
 <p align="center">
