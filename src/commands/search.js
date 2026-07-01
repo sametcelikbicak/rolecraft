@@ -91,8 +91,8 @@ function pickAndInstallTUI(items) {
     }
 
     function cleanup() {
-      input.removeListener('data', onData)
-      input.setRawMode(false)
+      try { input.removeListener('data', onData) } catch {}
+      try { input.setRawMode(false) } catch {}
       cursorShow()
       output.write('\n')
     }
@@ -102,7 +102,8 @@ function pickAndInstallTUI(items) {
       input.resume()
       input.on('data', onData)
     } catch {
-      cleanup()
+      try { input.pause() } catch {}
+      cursorShow()
       resolve(null)
     }
   })

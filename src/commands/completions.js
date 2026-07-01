@@ -26,24 +26,27 @@ const OPTION_FLAGS = [
 ]
 
 function bashScript() {
+  const C = COMMANDS.join(' ')
+  const S = SCOPE_FLAGS.join(' ')
+  const O = OPTION_FLAGS.join(' ')
   return `# rolecraft bash completion
 # Source: rolecraft completions bash
 # Install: source <(rolecraft completions bash)
 
 _rolecraft() {
-  local cur prev words cword
-  _init_completion || return
+  local cur="\${COMP_WORDS[COMP_CWORD]}"
+  local prev="\${COMP_WORDS[COMP_CWORD-1]}"
 
-  local commands="${COMMANDS.join(' ')}"
-  local scope_flags="${SCOPE_FLAGS.join(' ')}"
-  local option_flags="${OPTION_FLAGS.join(' ')}"
+  local commands="${C}"
+  local scope_flags="${S}"
+  local option_flags="${O}"
 
-  if [[ $cword -eq 1 ]]; then
+  if [[ $COMP_CWORD -eq 1 ]]; then
     COMPREPLY=($(compgen -W "$commands" -- "$cur"))
     return 0
   fi
 
-  case "$\{words[1]}" in
+  case "\${COMP_WORDS[1]}" in
     install|bundle|use|setup)
       COMPREPLY=($(compgen -W "$scope_flags $option_flags" -- "$cur"))
       ;;
