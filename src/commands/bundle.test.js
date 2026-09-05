@@ -184,6 +184,28 @@ describe('bundle command', () => {
     )
   })
 
+  it('preserves failure counts and frozen-lockfile exit behavior', async () => {
+    const sources = [join(tempDir, 'missing-one'), join(tempDir, 'missing-two')]
+    const origError = console.error
+    const errors = []
+    console.error = (...args) => errors.push(format(...args))
+    capture()
+    try {
+      await bundleModule.bundleCommand(sources)
+      assert.ok(logs.some((line) => line.includes('0 installed, 2 failed.')))
+      assert.equal(errors.length, 2)
+      assert.ok(errors[0].includes(sources[0]))
+      assert.ok(errors[1].includes(sources[1]))
+      await assert.rejects(
+        bundleModule.bundleCommand(sources, { frozenLockfile: true }),
+        /Some skills failed to install/,
+      )
+    } finally {
+      restoreLog()
+      console.error = origError
+    }
+  })
+
   it('creates a bundle file with a given name', async () => {
     capture()
     await bundleModule.bundleCreateCommand('test-collection')
@@ -241,12 +263,8 @@ describe('bundle command', () => {
     const copyPath = join(tempDir, 'bundle-interactive.mjs')
     let modSrc = readFileSync(join(__dirname, 'bundle.js'), 'utf-8')
     modSrc = modSrc.replace(
-      `import { apiInstallSkills } from '../api/install.js'`,
-      `import { apiInstallSkills } from '${join(__dirname, '../api/install.js')}'`,
-    )
-    modSrc = modSrc.replace(
-      `import { expandTilde } from '../utils/paths.js'`,
-      `import { expandTilde } from '${join(__dirname, '../utils/paths.js')}'`,
+      "'../api/bundle-internal.js'",
+      JSON.stringify(join(__dirname, '../api/bundle-internal.js')),
     )
     modSrc = modSrc.replace(
       `import { createInterface } from 'node:readline'`,
@@ -279,12 +297,8 @@ describe('bundle command', () => {
     const copyPath = join(tempDir, 'bundle-overwrite.mjs')
     let modSrc = readFileSync(join(__dirname, 'bundle.js'), 'utf-8')
     modSrc = modSrc.replace(
-      `import { apiInstallSkills } from '../api/install.js'`,
-      `import { apiInstallSkills } from '${join(__dirname, '../api/install.js')}'`,
-    )
-    modSrc = modSrc.replace(
-      `import { expandTilde } from '../utils/paths.js'`,
-      `import { expandTilde } from '${join(__dirname, '../utils/paths.js')}'`,
+      "'../api/bundle-internal.js'",
+      JSON.stringify(join(__dirname, '../api/bundle-internal.js')),
     )
     modSrc = modSrc.replace(
       `import { createInterface } from 'node:readline'`,
@@ -296,9 +310,8 @@ describe('bundle command', () => {
       ].join('\n'),
     )
     modSrc = modSrc.replace(
-      `import { readFile, writeFile } from 'node:fs/promises'`,
+      `import { writeFile } from 'node:fs/promises'`,
       [
-        `import { readFile } from 'node:fs/promises'`,
         `import { writeFile as _bOrigWf } from 'node:fs/promises'`,
         `let _bWfCalls = 0`,
         `const writeFile = async (...args) => {`,

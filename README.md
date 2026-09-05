@@ -51,7 +51,7 @@
 
 
 <p align="center">
-  <b>⚡ Zero dependencies</b> · <b>📦 397.4 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
+  <b>⚡ Zero dependencies</b> · <b>📦 396.0 kB</b> · <b>🤖 27 verified agents</b> · <b>🔌 Skills + MCP</b> · <b>🔒 Security scoring</b> · <b>📝 Skill testing</b> · <b>🔧 Init templates</b> · <b>🌐 Offline-first</b>
 </p>
 
 ---
@@ -85,7 +85,7 @@ rolecraft setup user/repo
 
 ## Features
 
-- **Zero dependencies** — 397.4 kB, only Node.js built-ins
+- **Zero dependencies** — 396.0 kB, only Node.js built-ins
 - **Any source** — local folder, GitHub/GitLab/SSH URL, npm package
 - **87 agents** — opencode, claude-code, cursor, copilot, aider, oh-my-pi, and more
 - **No registry required** — works fully without a marketplace; community-driven [registry](https://github.com/rolecraft-sh/registry) optional
@@ -159,7 +159,7 @@ git clone https://github.com/rolecraft-sh/rolecraft.git && cd rolecraft
 npm install                # sets up the pre-commit hook automatically
 npm link                   # rolecraft CLI runs from local checkout
 npm run lint               # syntax + Biome checks
-npm test                   # 1004+ tests, 0 fails expected
+npm test                   # 1007+ tests, 0 fails expected
 ```
 
 A `pre-commit` hook runs lint automatically on every commit. Zero-runtime-dependency policy is preserved — Biome and VitePress are devDependencies only.
