@@ -1,9 +1,11 @@
-import { readFile, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createInterface } from 'node:readline'
 import { stdin as input, stdout as output } from 'node:process'
-import { apiInstallSkills } from '../api/install.js'
-import { expandTilde } from '../utils/paths.js'
+import {
+  loadBundleSources,
+  installBundleSources,
+} from '../api/bundle-internal.js'
 
 function askQuestion(query) {
   const rl = createInterface({ input, output })
@@ -13,59 +15,6 @@ function askQuestion(query) {
       resolve(answer.trim())
     })
   })
-}
-
-function parseSources(raw, filePath) {
-  if (filePath.endsWith('.json')) {
-    const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed)) return parsed
-    if (parsed.skills && Array.isArray(parsed.skills)) return parsed.skills
-    throw new Error(
-      'JSON bundle must be an array of sources or an object with a "skills" array',
-    )
-  }
-
-  return raw
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l && !l.startsWith('#'))
-}
-
-async function resolveBundleFile(arg) {
-  const isFilePath =
-    arg.endsWith('.json') ||
-    arg.endsWith('.txt') ||
-    arg.startsWith('./') ||
-    arg.startsWith('../') ||
-    arg.startsWith('/') ||
-    arg.startsWith('~')
-  if (isFilePath) {
-    const resolvedPath = expandTilde(arg, process.env.HOME || '/tmp')
-    for (const candidate of [resolvedPath, join(process.cwd(), arg)]) {
-      try {
-        await readFile(candidate, 'utf-8')
-        return candidate
-      } catch {}
-    }
-    throw new Error(`Bundle file not found: ${arg}`)
-  }
-
-  const candidates = [
-    arg,
-    join(process.cwd(), arg),
-    `${arg}.json`,
-    `${arg}.txt`,
-    join(process.cwd(), `${arg}.json`),
-    join(process.cwd(), `${arg}.txt`),
-  ]
-
-  for (const candidate of candidates) {
-    try {
-      await readFile(candidate, 'utf-8')
-      return candidate
-    } catch {}
-  }
-  return null
 }
 
 async function installSources(sources, label, options, noMcp = false) {
@@ -78,36 +27,23 @@ async function installSources(sources, label, options, noMcp = false) {
     `\n📦 Installing ${sources.length} skill(s)${label}:${label ? '\n' : ''}`,
   )
 
-  let successCount = 0
-  let failCount = 0
-
-  for (let i = 0; i < sources.length; i++) {
-    const source = sources[i]
-
-    if (options.dryRun) {
-      console.log(`   • ${source}`)
-      continue
-    }
-
-    console.log('   [%s/%s] %s', i + 1, sources.length, source)
-
-    try {
-      await apiInstallSkills(source, {
-        scope: { global: true, project: true },
-        yes: true,
-        noMcp: noMcp,
-      })
-      successCount++
-    } catch (err) {
-      console.error('   ❌ %s: %s', source, err?.message)
-      failCount++
-    }
-  }
-
   if (options.dryRun) {
+    for (const source of sources) console.log(`   • ${source}`)
     console.log(`\n📋 [dry-run] Would install ${sources.length} skill(s).\n`)
     return
   }
+
+  const { installed: successCount, failed: failCount } =
+    await installBundleSources(
+      sources,
+      { yes: true, noMcp },
+      {
+        onStart: (source, index) =>
+          console.log('   [%s/%s] %s', index + 1, sources.length, source),
+        onError: (source, error) =>
+          console.error('   ❌ %s: %s', source, error?.message),
+      },
+    )
 
   console.log()
 
@@ -159,17 +95,11 @@ export async function bundleCreateCommand(name) {
 }
 
 export async function bundleCommand(sources, options = {}) {
-  if (typeof sources === 'string') {
-    const filePath = await resolveBundleFile(sources)
-    if (filePath) {
-      const raw = await readFile(filePath, 'utf-8')
-      const parsed = parseSources(raw, filePath)
-      await installSources(parsed, ` from ${filePath}`, options, options.noMcp)
-      return
-    }
-    await installSources([sources], '', options, options.noMcp)
-    return
-  }
-
-  await installSources(sources, '', options, options.noMcp)
+  const { sources: parsed, filePath } = await loadBundleSources(sources)
+  await installSources(
+    parsed,
+    filePath ? ` from ${filePath}` : '',
+    options,
+    options.noMcp,
+  )
 }
