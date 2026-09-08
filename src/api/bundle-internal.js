@@ -72,8 +72,8 @@ export async function installBundleSources(
   const results = []
   const installOpts = {
     scope: { global: true, project: true },
-    yes: options.yes || false,
-    noMcp: options.noMcp || false,
+    yes: options.yes ?? false,
+    noMcp: options.noMcp ?? false,
   }
   let installed = 0
   let failed = 0
